@@ -1,8 +1,86 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Application xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Cycles.App">
+<Application x:Class="Cycles.App"
+             xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
     <Application.Resources>
+        <Color x:Key="TextColorWhite">#FFFFFF</Color>
+        <Color x:Key="TextColorLightBlack">#262626</Color>
+        <Color x:Key="TextColorNearBlack">#191919</Color>
+        <Color x:Key="TextColorMediumGrey">#555555</Color>
+        <Color x:Key="TextColorLightGrey">#424242</Color>
 
+        <Color x:Key="EntryBGColorWhite">#FFFFFF</Color>
+        <Color x:Key="EntryBGColorNearWhite">#D8D8D8</Color>
+        <Color x:Key="EntryBGColorNearWhiteT">#CCCECECE</Color>
+        <Color x:Key="EntryBGColorNormalRed">#E46F74</Color>
+        <Color x:Key="ButtonBGColorNormalRed">#DD4C52</Color>
+
+
+        <x:Double x:Key="FontSizeLarge">30</x:Double>
+        <x:Double x:Key="FontSizeBig">24</x:Double>
+        <x:Double x:Key="FontSizeMedium">16</x:Double>
+        <x:Double x:Key="FontSizeMediumAlt">18</x:Double>
+        <x:Double x:Key="FontSizeSmall">14</x:Double>
+        <x:Double x:Key="FontSizeTiny">8</x:Double>
+        <x:Double x:Key="FontSizeVeryTiny">4</x:Double>
+
+        <x:Double x:Key="DottedPathMarginTop">32</x:Double>
+
+        <x:Double x:Key="XSmallCornerRadius">4</x:Double>
+        <x:Double x:Key="SmallCornerRadius">4</x:Double>
+        <x:Double x:Key="MediumCornerRadius">8</x:Double>
+        <x:Double x:Key="LargeCornerRadius">16</x:Double>
+        <x:Double x:Key="XLargeCornerRadius">32</x:Double>
+
+        <OnPlatform x:Key="QuicksandBold" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Quicksand-Bold.ttf#Quicksand Bold" />
+            <!--<On Platform="UWP"
+                Value="/Assets/OpenSans-Bold.ttf#Open Sans" />
+            <On Platform="iOS"
+                Value="OpenSans-Bold" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="QuicksandRegular" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Quicksand-Regular.ttf#Quicksand Regular" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="QuicksandMedium" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Quicksand-Medium.ttf#Quicksand Medium" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="QuicksandLight" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Quicksand-Light.ttf#Quicksand Light" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
+
+        <OnPlatform x:Key="MontserratBold" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Montserrat-Bold.ttf#Montserrat Bold" />
+            <!--<On Platform="UWP"
+                Value="/Assets/OpenSans-Bold.ttf#Open Sans" />-->
+            <!--<On Platform="iOS"
+                Value="Montserrat-Bold" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="MontserratRegular" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Montserrat-Regular.ttf#Montserrat Regular" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="MontserratItalic" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Montserrat-Italic.ttf#Montserrat Italic" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="MontserratMedium" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Montserrat-Medium.ttf#Montserrat Medium" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
+        <OnPlatform x:Key="MontserratLight" x:TypeArguments="x:String">
+            <On Platform="Android" Value="Quicksand-Light.ttf#Montserrat Light" />
+            <!--<On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />-->
+        </OnPlatform>
     </Application.Resources>
 </Application>

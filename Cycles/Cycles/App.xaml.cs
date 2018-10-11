@@ -1,4 +1,5 @@
 ﻿using System;
+using Android.Util;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -7,11 +8,17 @@ namespace Cycles
 {
     public partial class App : Application
     {
+        public static int ScreenHeight;
+
+        public static int ScreenWidth;
+
+        public static float ScreenDensity { get; internal set; }
+
         public App()
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = new Login();
         }
 
         protected override void OnStart()

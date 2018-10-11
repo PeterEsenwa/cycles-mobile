@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<utils:InitPage x:Class="Cycles.Login"
+                xmlns="http://xamarin.com/schemas/2014/forms"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:utils="clr-namespace:Cycles.Utils"
+                xmlns:views="clr-namespace:Cycles.Views">
+    <ContentPage.Content>
+        <Grid VerticalOptions="Fill"
+              HorizontalOptions="Fill"
+              RowSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width=".025*" />
+                <ColumnDefinition Width="0.95*" />
+                <ColumnDefinition Width=".025*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="row0" Height="0.22*" />
+                <RowDefinition x:Name="row1" Height="0.25*" />
+                <RowDefinition x:Name="row2" Height="Auto" />
+                <RowDefinition x:Name="row3" Height="0.25*" />
+                <RowDefinition x:Name="row4" Height="Auto" />
+                <RowDefinition x:Name="row5" Height="Auto" />
+            </Grid.RowDefinitions>
+            <Image x:Name="DottedPath"
+                   Grid.Row="0"
+                   Grid.RowSpan="4"
+                   Grid.Column="1"
+                   Source="dotted_path"
+                   Margin="{Binding DottedPathMargin}"
+                   HorizontalOptions="Fill"
+                   VerticalOptions="Center" />
+
+            <Grid x:Name="HeaderTextAndImage"
+                  Grid.Row="0"
+                  Grid.Column="1"
+                  RowSpacing="0"
+                  VerticalOptions="Center"
+                  HorizontalOptions="Fill">
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="row00" Height="{Binding DottedPathMargin}" />
+                    <RowDefinition x:Name="row01" Height="Auto" />
+                    <RowDefinition x:Name="row02" Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <views:CustomLabel Grid.Row="1"
+                                   Text="Get back to"
+                                   VerticalOptions="Center"
+                                   FontSizeFactor="1.2"
+                                   NamedFontSize="Medium"
+                                   HorizontalOptions="FillAndExpand"
+                                   HorizontalTextAlignment="Center"
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   TextColor="{StaticResource TextColorNearBlack}" />
+                <views:CustomLabel Grid.Row="2"
+                                   Text="CYCLING"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   FontSizeFactor="1.2"
+                                   NamedFontSize="Medium"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   TextColor="{StaticResource TextColorNearBlack}" />
+            </Grid>
+
+            <Grid x:Name="InputsHolder"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  BackgroundColor="Transparent"
+                  VerticalOptions="Fill"
+                  HorizontalOptions="Fill"
+                  RowSpacing="{StaticResource FontSizeSmall}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.075*" />
+                    <ColumnDefinition Width="0.85*" />
+                    <ColumnDefinition Width="0.075*" />
+                </Grid.ColumnDefinitions>
+                <views:PaddingBorderEntry Grid.Row="0"
+                                          Grid.Column="1"
+                                          Padding="18,18"
+                                          BackgroundOpacity="217"
+                                          HorizontalOptions="Fill"
+                                          IsCurvedCornersEnabled="True"
+                                          CornerRadius="{StaticResource XSmallCornerRadius}"
+                                          HasBorder="True"
+                                          BorderWidth="6"
+                                          VerticalOptions="End"
+                                          BorderColor="{StaticResource EntryBGColorNormalRed}"
+                                          Placeholder="Username"
+                                          FontFamily="{StaticResource QuicksandMedium}"
+                                          FontSizeFactor=".8"
+                                          NamedFontSize="Medium"
+                                          TextColor="{StaticResource TextColorNearBlack}"
+                                          PlaceholderColor="{StaticResource TextColorMediumGrey}"
+                                          Background="{StaticResource EntryBGColorWhite}"
+                                          ReturnType="Next" />
+                <views:PaddingBorderEntry x:Name="password_field"
+                                          Grid.Row="1"
+                                          Grid.Column="1"
+                                          Padding="18,18"
+                                          VerticalOptions="Start"
+                                          HorizontalOptions="Fill"
+                                          IsCurvedCornersEnabled="True"
+                                          CornerRadius="{StaticResource XSmallCornerRadius}"
+                                          HasBorder="True"
+                                          BorderWidth="6"
+                                          BorderColor="{StaticResource EntryBGColorNormalRed}"
+                                          BackgroundOpacity="217"
+                                          Placeholder="Password"
+                                          IsPassword="True"
+                                          FontFamily="{StaticResource QuicksandMedium}"
+                                          FontSizeFactor=".8"
+                                          NamedFontSize="Medium"
+                                          TextColor="{StaticResource TextColorNearBlack}"
+                                          PlaceholderColor="{StaticResource TextColorMediumGrey}"
+                                          Background="{StaticResource EntryBGColorWhite}"
+                                          ReturnType="Next" />
+            </Grid>
+
+            <views:CustomLabel x:Name="forgot_password"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               HorizontalOptions="CenterAndExpand"
+                               Text="forgot your password?"
+                               FontSizeFactor="1.1"
+                               NamedFontSize="Micro"
+                               TextColor="{StaticResource TextColorLightGrey}"
+                               FontFamily="{StaticResource QuicksandMedium}" />
+            <views:SizedButton x:Name="login_btn"
+                               Grid.Row="3"
+                               Grid.Column="1"
+                               Padding="64,8"
+                               Text="Login"
+                               Clicked="Login_btn_Clicked"
+                               VerticalOptions="Start"
+                               BackgroundColor="{StaticResource ButtonBGColorNormalRed}"
+                               HorizontalOptions="CenterAndExpand"
+                               FontSizeFactor=".8"
+                               NamedFontSize="Medium"
+                               TextColor="{StaticResource TextColorWhite}"
+                               FontFamily="{StaticResource QuicksandBold}" />
+
+            <views:CustomLabel x:Name="goto_signup"
+                               Grid.Row="4"
+                               Grid.Column="1"
+                               FontSizeFactor="1.1"
+                               NamedFontSize="Micro"
+                               HorizontalOptions="CenterAndExpand"
+                               Text="don't have an account? Signup now!"
+                               TextColor="{StaticResource TextColorLightGrey}"
+                               FontFamily="{StaticResource QuicksandMedium}" />
+            <Grid Grid.Row="5"
+                  Grid.Column="1"
+                  Margin="8"
+                  utils:RoundCorners.CornerRadius="{StaticResource LargeCornerRadius}"
+                  VerticalOptions="CenterAndExpand"
+                  BackgroundColor="{StaticResource EntryBGColorNearWhite}">
+                <StackLayout Margin="0,32"
+                             Orientation="Horizontal"
+                             VerticalOptions="CenterAndExpand"
+                             HorizontalOptions="CenterAndExpand">
+
+                    <views:CustomLabel Text="continue with"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="Center"
+                                       FontSizeFactor="1.2"
+                                       NamedFontSize="Micro"
+                                       TextColor="{StaticResource TextColorNearBlack}"
+                                       FontFamily="{StaticResource MontserratRegular}" />
+
+                    <Image Source="fb_icon.png"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+
+                    <views:CustomLabel Text="or"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       FontSizeFactor="1.2"
+                                       NamedFontSize="Micro"
+                                       TextColor="{StaticResource TextColorNearBlack}"
+                                       FontFamily="{StaticResource MontserratRegular}" />
+
+                    <Image Source="google_icon.png"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </StackLayout>
+            </Grid>
+
+        </Grid>
+    </ContentPage.Content>
+</utils:InitPage>
