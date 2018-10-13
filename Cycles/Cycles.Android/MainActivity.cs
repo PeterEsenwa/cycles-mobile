@@ -36,8 +36,7 @@ namespace Cycles.Droid
             base.OnCreate(savedInstanceState);
             Forms.Init(this, savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9",
-                    typeof(Analytics), typeof(Crashes));
+           
             AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
 
             DisplayMetrics dm = new DisplayMetrics();

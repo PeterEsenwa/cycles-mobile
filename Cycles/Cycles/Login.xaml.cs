@@ -4,6 +4,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Support.V4.Content;
 using Cycles.Utils;
+using Cycles.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -34,7 +35,7 @@ namespace Cycles
             //}
             try
             {
-                Application.Current.MainPage = new MainPage();
+                Application.Current.MainPage = new RootPage();
             }
             catch (Exception ex)
             {

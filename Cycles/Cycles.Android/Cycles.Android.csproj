@@ -21,7 +21,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <AndroidKeyStore>true</AndroidKeyStore>
-    <AndroidSigningKeyStore>C:\Users\Peter Esenwa\AppData\Local\Xamarin\Mono for Android\debug.keystore</AndroidSigningKeyStore>
+    <AndroidSigningKeyStore>C:\Users\Dell Inspiron 15\AppData\Local\Xamarin\Mono for Android\debug.keystore</AndroidSigningKeyStore>
     <AndroidSigningStorePass>android</AndroidSigningStorePass>
     <AndroidSigningKeyPass>android</AndroidSigningKeyPass>
     <AndroidSigningKeyAlias>androiddebugkey</AndroidSigningKeyAlias>
@@ -85,6 +85,7 @@
     <Compile Include="Effects\CornerRadiusEffectDroid.cs" />
     <Compile Include="Effects\EntryShadowEffect.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="Renderers\CyclesMapRenderer.cs" />
     <Compile Include="Renderers\PBEntryRenderer.cs" />
     <Compile Include="Renderers\SizedButtonRenderer.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
@@ -163,6 +164,21 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-hdpi\fb_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\bike_park.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\bike_park.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\bike_park.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\bike_park.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\bike_park.png" />
   </ItemGroup>
   <Import Project="..\Cycles\Cycles.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

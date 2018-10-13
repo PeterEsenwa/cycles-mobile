@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Cycles.Views.RootPageMaster"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:Utils="clr-namespace:Cycles.Utils"
+    xmlns:views="clr-namespace:Cycles.Views"
+    Title="Master">
+    <StackLayout>
+        <ListView
+            x:Name="MenuItemsListView"
+            HasUnevenRows="true"
+            ItemsSource="{Binding MenuItems}"
+            SeparatorVisibility="None">
+            <ListView.Header>
+                <Grid BackgroundColor="{StaticResource EntryBGColorNormalRed}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                    </Grid.RowDefinitions>
+                    <views:CustomLabel
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="{Utils:ResponsiveThickness Size=Large,
+                                                           Bottom=18,
+                                                           Left=6,
+                                                           Right=6,
+                                                           Top=18}"
+                        FontFamily="{StaticResource MontserratBold}"
+                        FontSizeFactor="1.5"
+                        NamedFontSize="Medium"
+                        Text="PE"
+                        TextColor="White"
+                        VerticalOptions="FillAndExpand"
+                        VerticalTextAlignment="Center" />
+                </Grid>
+            </ListView.Header>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Padding="15,10" HorizontalOptions="FillAndExpand">
+                            <views:CustomLabel
+                                FontFamily="{StaticResource MontserratRegular}"
+                                FontSize="24"
+                                FontSizeFactor="1"
+                                NamedFontSize="Small"
+                                Text="{Binding Title}"
+                                VerticalOptions="FillAndExpand"
+                                VerticalTextAlignment="Center" />
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>

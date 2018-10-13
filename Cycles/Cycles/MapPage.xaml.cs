@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Cycles.Views;
+using System;
+using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using Xamarin.Essentials;
@@ -7,11 +9,10 @@ using Xamarin.Forms.Maps;
 
 namespace Cycles
 {
-    public partial class MainPage : ContentPage
+    public partial class MapPage : ContentPage
     {
         private ExceptionDispatchInfo capturedException;
-
-        public MainPage()
+        public MapPage()
         {
             try
             {
@@ -30,20 +31,37 @@ namespace Cycles
             {
                 capturedException = ExceptionDispatchInfo.Capture(ex);
                 Console.WriteLine(ex.Message);
+                capturedException.Throw();
             }
-        }
+            BindingContext = this;
 
-        public Timer progressticker { get; private set; }
+            CustomPin pin = new CustomPin
+            {
+                Type = PinType.Place,
+                PinType = CustomPin.CustomType.Park,
+                Position = new Position(6.672219, 3.161639),
+                Label = "Cycles Point @Cafe 2",
+                Address = "Cafeteria 2, Goodness Rd, Canaan Land, Ota",
+                Id = "P2"
+            };
+            map.CustomPins = new List<CustomPin> { pin };
+            map.Pins.Add(pin);
+        }
 
         protected override async void OnAppearing()
         {
-
             base.OnAppearing();
             if (capturedException != null)
             {
                 bool action = await DisplayAlert("Alert", "You need to allow Location access to the app", "Go", "Close app");
                 capturedException.Throw();
             }
+            await PrepareMap();
+
+        }
+
+        private async System.Threading.Tasks.Task PrepareMap()
+        {
             try
             {
                 GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromMilliseconds(10000));
@@ -53,17 +71,20 @@ namespace Cycles
                 {
                     await progressBar.ProgressTo(1, 250, Easing.CubicInOut);
                     progressBar.IsVisible = false;
-                    map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position( location.Latitude, location.Longitude),
+                    map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(location.Latitude, location.Longitude),
                                              Distance.FromKilometers(.1)));
                     map.IsVisible = true;
                 }
                 else
                 {
-                    bool retry = await DisplayAlert("Network Issue", "We couldn't your location. Please check your network", "Ok", "Retry");
+                    bool retry = await DisplayAlert("Network Issue", "We couldn't get your location. Please check your network", "Ok", "Retry");
                     if (retry)
                     {
-                        location = await Geolocation.GetLastKnownLocationAsync();
-                        map.IsVisible = true;
+                        await PrepareMap();
+                    }
+                    else
+                    {
+                        Application.Current.Quit();
                     }
                 }
             }
@@ -82,7 +103,6 @@ namespace Cycles
                 bool action = await DisplayAlert("Unknown", "You need to allow Location access to the app", "Go", "Close app");
                 // Unable to get location
             }
-
         }
     }
 }
