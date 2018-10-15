@@ -14,6 +14,7 @@
         <Color x:Key="EntryBGColorNearWhiteT">#CCCECECE</Color>
         <Color x:Key="EntryBGColorNormalRed">#E46F74</Color>
         <Color x:Key="ButtonBGColorNormalRed">#DD4C52</Color>
+        <Color x:Key="SButtonBDColorNormalGreen">#31B451</Color>
 
 
         <x:Double x:Key="FontSizeLarge">30</x:Double>

@@ -79,7 +79,7 @@ namespace Cycles.Views
             set { SetValue(CornerRadiusProperty, value); }
         }
 
-        //#region Has Border property
+        #region Has Border property
         private static BindableProperty HasBorderProperty { get; } = BindableProperty.Create(
             "HasBorder",
             typeof(bool),
@@ -96,7 +96,7 @@ namespace Cycles.Views
             set { SetValue(HasBorderProperty, value); }
         }
 
-        //#endregion
+        #endregion
 
         public PaddingBorderEntry()
         {

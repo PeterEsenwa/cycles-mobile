@@ -1,9 +1,43 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Android.Views;
+using Xamarin.Forms;
 
 namespace Cycles.Views
 {
     internal class SizedButton : Button
     {
+        private static BindableProperty IsRoundProperty { get; } = BindableProperty.Create(
+              "IsRound",
+              typeof(bool),
+              typeof(SizedButton),
+              false,
+              propertyChanged: (bindable, oldvalue, newvalue) =>
+              {
+                  ((SizedButton)bindable).InvalidateMeasure();
+              }
+        );
+
+        public bool IsRound {
+            get { return (bool)GetValue(IsRoundProperty); }
+            set { SetValue(IsRoundProperty, value); }
+        }
+
+        public int Radius {
+            get { return (int)GetValue(RadiusProperty); }
+            set { SetValue(RadiusProperty, value); }
+        }
+
+        private static BindableProperty RadiusProperty { get; } = BindableProperty.Create(
+              "Radius",
+              typeof(int),
+              typeof(SizedButton),
+              0,
+              propertyChanged: (bindable, oldvalue, newvalue) =>
+              {
+                  ((SizedButton)bindable).InvalidateMeasure();
+              }
+        );
+
         public Thickness Padding {
             get { return (Thickness)GetValue(PaddingProperty); }
             set { SetValue(PaddingProperty, value); }
@@ -18,6 +52,12 @@ namespace Cycles.Views
           {
               ((SizedButton)bindable).InvalidateMeasure();
           });
+
+        public static explicit operator SizedButton(Android.Views.View v)
+        {
+            throw new NotImplementedException();
+        }
+
         private static BindableProperty FontSizeFactorProperty { get; } = BindableProperty.Create(
           "FontSizeFactor",
           typeof(double),

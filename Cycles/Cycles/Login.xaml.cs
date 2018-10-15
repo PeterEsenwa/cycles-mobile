@@ -35,7 +35,8 @@ namespace Cycles
             //}
             try
             {
-                Application.Current.MainPage = new RootPage();
+                RootPage rootPage = new RootPage();
+                Application.Current.MainPage = rootPage;
             }
             catch (Exception ex)
             {

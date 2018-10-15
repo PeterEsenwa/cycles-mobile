@@ -28,7 +28,11 @@ namespace Cycles.Views
             var page = (Page)Activator.CreateInstance(item.TargetType);
             page.Title = item.Title;
 
-            Detail = new NavigationPage(page);
+            NavigationPage detailPage = new NavigationPage(page)
+            {
+                BarBackgroundColor = Color.Red
+            };
+            Detail = detailPage;
             IsPresented = false;
 
             MasterPage.ListView.SelectedItem = null;

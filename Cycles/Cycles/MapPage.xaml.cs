@@ -1,8 +1,10 @@
 ﻿using Cycles.Views;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Runtime.ExceptionServices;
-using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -21,7 +23,7 @@ namespace Cycles
                 {
                     if (progressBar.Progress < 1)
                     {
-                        Device.BeginInvokeOnMainThread(() => progressBar.ProgressTo(progressBar.Progress + 0.025, 250, Easing.Linear));
+                        Device.BeginInvokeOnMainThread(() => progressBar.ProgressTo(progressBar.Progress + 0.0025, 250, Easing.Linear));
                         return true;
                     }
                     return false;
@@ -59,12 +61,13 @@ namespace Cycles
             await PrepareMap();
 
         }
-
-        private async System.Threading.Tasks.Task PrepareMap()
+        public bool IsRideOngoing { get; set; } = false;
+        public bool IsCalculatingDist { get; set; } = false;
+        private async Task PrepareMap()
         {
             try
             {
-                GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromMilliseconds(10000));
+                GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromMilliseconds(30000));
                 Location location = await Geolocation.GetLocationAsync(request);
 
                 if (location != null)
@@ -77,7 +80,7 @@ namespace Cycles
                 }
                 else
                 {
-                    bool retry = await DisplayAlert("Network Issue", "We couldn't get your location. Please check your network", "Ok", "Retry");
+                    bool retry = await DisplayAlert("Network Issue", "We couldn't get your location. Please check your network", "RETRY", "CLOSE APP");
                     if (retry)
                     {
                         await PrepareMap();
@@ -102,6 +105,163 @@ namespace Cycles
             {
                 bool action = await DisplayAlert("Unknown", "You need to allow Location access to the app", "Go", "Close app");
                 // Unable to get location
+            }
+        }
+
+        private async void SizedButton_Clicked(object sender, EventArgs e)
+        {
+            //JsonValue value = JsonValue.Parse(@"{ ""name"":""Prince Charming"", ...");
+            //JsonObject result = value as JsonObject;
+            Location location = await Geolocation.GetLastKnownLocationAsync();
+            double shortestDistance = 0;
+            Location neareatPark = new Location();
+            foreach (Pin pin in map.Pins)
+            {
+                Location locationEnd = new Location(pin.Position.Latitude, pin.Position.Longitude);
+                double tempDistance = Location.CalculateDistance(location, locationEnd, DistanceUnits.Kilometers);
+                if (shortestDistance == 0)
+                {
+                    neareatPark = locationEnd;
+                }
+                else
+                {
+                    neareatPark = (tempDistance < shortestDistance) ? locationEnd : neareatPark;
+                    shortestDistance = (tempDistance < shortestDistance) ? tempDistance : shortestDistance;
+                }
+            }
+            map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(neareatPark.Latitude, neareatPark.Longitude),
+                                            Distance.FromKilometers(.1)));
+        }
+
+        private Location startLocation;
+        private Location endLocation;
+        private double TotalDistance = 0;
+        private Image tempImage = new Image();
+        private async void StartRide_Clicked(object sender, EventArgs e)
+        {
+            //JsonValue value = JsonValue.Parse(@"{ ""name"":""Prince Charming"", ...");
+            //JsonObject result = value as JsonObject;
+            //double shortestDistance = 0;
+            //Location neareatPark = new Location();
+            //foreach (Pin pin in map.Pins)
+            //{
+            //    Location locationEnd = new Location(pin.Position.Latitude, pin.Position.Longitude);
+            //    double tempDistance = Location.CalculateDistance(location, locationEnd, DistanceUnits.Kilometers);
+            //    if (shortestDistance == 0)
+            //    {
+            //        neareatPark = locationEnd;
+            //    }
+            //    else
+            //    {
+            //        neareatPark = (tempDistance < shortestDistance) ? locationEnd : neareatPark;
+            //        shortestDistance = (tempDistance < shortestDistance) ? tempDistance : shortestDistance;
+            //    }
+            //}
+            //map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(neareatPark.Latitude, neareatPark.Longitude),
+            //                                Distance.FromKilometers(.1)));
+
+            SizedButton rideBtn = ((SizedButton)sender);
+            if (!IsRideOngoing)
+            {
+                IsRideOngoing = true;
+                tempImage.Source = rideBtn.Image;
+                rideBtn.Image = null;
+                rideBtn.Text = "Starting...";
+                int seconds = 0;
+                Task incrementTask = Task.Run(() =>
+                {
+                    Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+                    {
+                        if ((IsRideOngoing && !IsCalculatingDist) || (!IsRideOngoing && IsCalculatingDist))
+                        {
+                            seconds = seconds + 1;
+                            // Ensure that seconds is less than TimeSpan.MaxValue.TotalSeconds to avoid an exception
+                            TimeSpan time = TimeSpan.FromSeconds(seconds);
+
+                            //here backslash is must to tell that colon is
+                            //not the part of format, it just a character that we want in output
+                            string str = time.ToString(@"hh\:mm\:ss");
+                            rideBtn.Text = str;
+                            return true;
+                        }
+                        rideBtn.Image = (FileImageSource)tempImage.Source;
+                        return false;
+                    });
+                });
+
+                Task locationTask = Task.Run(() =>
+                {
+                    Device.StartTimer(TimeSpan.FromSeconds(30), () =>
+                    {
+                        return Task.Run(async () =>
+                        {
+                            //GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromMilliseconds(25000));
+                            //startLocation = await Geolocation.GetLocationAsync(request).ConfigureAwait(false);
+                            //endLocation = new Location();
+
+                            //if (startLocation == null && IsRideOngoing)
+                            //{
+                            //    return true;
+                            //}
+                            //if (startLocation != null && IsRideOngoing)
+                            //{
+                            //    Task<Location> endLocationTask = Geolocation.GetLocationAsync(request)
+                            //        .ContinueWith(t => endLocation = t.Result);
+                            //    endLocation = await endLocationTask.ConfigureAwait(false);
+                            //    TotalDistance += Location.CalculateDistance(startLocation, endLocation, DistanceUnits.Kilometers);
+                            //    return true;
+                            //}
+                            //if (!IsRideOngoing)
+                            //{
+                            //    IsCalculatingDist = true;
+                            //    await DisplayAlert("Ride Ended", "Distance covered " + TotalDistance + "km", "OK");
+                            //    IsCalculatingDist = false;
+                            //    return false;
+                            //}
+                            //return false;
+                            //seconds = seconds + 1;
+                            // Ensure that seconds is less than TimeSpan.MaxValue.TotalSeconds to avoid an exception
+                            //TimeSpan time = TimeSpan.FromSeconds(seconds);
+
+                            //here backslash is must to tell that colon is
+                            //not the part of format, it just a character that we want in output
+                            //string str = time.ToString(@"hh\:mm\:ss");
+                            //Console.WriteLine(str);
+                            //return true;
+
+                        }).Result;
+                    });
+                });
+            }
+            else
+            {
+                IsRideOngoing = false;
+            }
+
+        }
+
+        private string GET(string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            try
+            {
+                WebResponse response = request.GetResponse();
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.UTF8);
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (WebException ex)
+            {
+                WebResponse errorResponse = ex.Response;
+                using (Stream responseStream = errorResponse.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.GetEncoding("utf-8"));
+                    String errorText = reader.ReadToEnd();
+                    // log errorText
+                }
+                throw ex;
             }
         }
     }

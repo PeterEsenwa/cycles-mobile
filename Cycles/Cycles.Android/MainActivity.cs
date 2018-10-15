@@ -54,12 +54,14 @@ namespace Cycles.Droid
 
         private void CheckPermissions(App app)
         {
+            string lastPermission = "";
             foreach (string permission in PermissionsLocation)
             {
                 if (ContextCompat.CheckSelfPermission(this, permission) != (int)Permission.Granted)
                 {
                     // Camera permission is not granted. If necessary display rationale & request.
                     CanProceed = false;
+                    lastPermission = permission;
                     break;
                 }
                 else
@@ -75,7 +77,7 @@ namespace Cycles.Droid
             }
             else
             {
-                if (ActivityCompat.ShouldShowRequestPermissionRationale(this, Manifest.Permission.AccessFineLocation))
+                if (ActivityCompat.ShouldShowRequestPermissionRationale(this, lastPermission))
                 {
                     // Provide an additional rationale to the user if the permission was not granted
                     // and the user would benefit from additional context for the use of the permission.
@@ -108,11 +110,17 @@ namespace Cycles.Droid
                             .Make(layout, "You need to allow Location access to the app", Snackbar.LengthShort)
                             .SetAction("OK", v => ActivityCompat.RequestPermissions(this, PermissionsLocation, RequestLocationId))
                             .Show();
+                        CanProceed = false;
+                        break;
                     }
-                    else
-                    {
-                        CheckPermissions(app);
-                    }
+                }
+                if (CanProceed)
+                {
+                    LoadApplication(app);
+                }
+                else
+                {
+                    CheckPermissions(app);
                 }
             }
             else
