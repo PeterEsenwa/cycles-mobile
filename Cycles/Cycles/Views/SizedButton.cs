@@ -6,6 +6,11 @@ namespace Cycles.Views
 {
     internal class SizedButton : Button
     {
+        public SizedButton() : base()
+        {
+            
+        }
+
         private static BindableProperty IsRoundProperty { get; } = BindableProperty.Create(
               "IsRound",
               typeof(bool),
@@ -38,25 +43,25 @@ namespace Cycles.Views
               }
         );
 
-        public Thickness Padding {
-            get { return (Thickness)GetValue(PaddingProperty); }
-            set { SetValue(PaddingProperty, value); }
-        }
+        //public Thickness Padding {
+        //    get { return (Thickness)GetValue(PaddingProperty); }
+        //    set { SetValue(PaddingProperty, value); }
+        //}
 
-        private static BindableProperty PaddingProperty { get; } = BindableProperty.Create(
-          "Padding",
-          typeof(Thickness),
-          typeof(SizedButton),
-          new Thickness(5),
-          propertyChanged: (bindable, oldvalue, newvalue) =>
-          {
-              ((SizedButton)bindable).InvalidateMeasure();
-          });
+        //private static BindableProperty PaddingProperty { get; } = BindableProperty.Create(
+        //  "Padding",
+        //  typeof(Thickness),
+        //  typeof(SizedButton),
+        //  new Thickness(5),
+        //  propertyChanged: (bindable, oldvalue, newvalue) =>
+        //  {
+        //      ((SizedButton)bindable).InvalidateMeasure();
+        //  });
 
-        public static explicit operator SizedButton(Android.Views.View v)
-        {
-            throw new NotImplementedException();
-        }
+        //public static explicit operator SizedButton(Android.Views.View v)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         private static BindableProperty FontSizeFactorProperty { get; } = BindableProperty.Create(
           "FontSizeFactor",

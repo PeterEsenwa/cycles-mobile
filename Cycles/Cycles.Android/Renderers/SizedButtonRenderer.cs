@@ -1,19 +1,16 @@
 ﻿using Android.Content;
+using Android.Support.V7.Widget;
 using Cycles.Droid;
 using Cycles.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Android.Support.V7.Widget;
-using ButtonRenderer = Xamarin.Forms.Platform.Android.AppCompat.ButtonRenderer;
 using static Android.Views.View;
-using Android.Views;
-using Java.Lang;
-using System;
+using ButtonRenderer = Xamarin.Forms.Platform.Android.AppCompat.ButtonRenderer;
 
 [assembly: ExportRenderer(typeof(SizedButton), typeof(SizedButtonRenderer))]
 namespace Cycles.Droid
 {
-    internal class SizedButtonRenderer: ButtonRenderer, IOnLayoutChangeListener
+    internal class SizedButtonRenderer : ButtonRenderer, IOnLayoutChangeListener
     {
         private SizedButton _myButton;
         private AppCompatButton _androidButton;
@@ -28,7 +25,16 @@ namespace Cycles.Droid
             {
                 if (_myButton.IsRound && _myButton.Radius == 0)
                 {
-                    _androidButton.SetWidth(_androidButton.Height);
+                    //_androidButton.SetHeight((int)_myButton.Height);
+                    if (_androidButton.Width > _androidButton.Height)
+                    {
+                        _androidButton.SetWidth(_androidButton.Height);
+                    }
+                    else if (_androidButton.Width < _androidButton.Height)
+                    {
+                        _androidButton.SetHeight(_androidButton.Width);
+                    }
+
                     _myButton.CornerRadius = _androidButton.Width / 2;
                 }
                 else if (_myButton.IsRound)
@@ -41,9 +47,9 @@ namespace Cycles.Droid
                     {
                         _myButton.Radius = 100;
                     }
-                    decimal radius = decimal.Divide(_myButton.Radius,100) ;
+                    decimal radius = decimal.Divide(_myButton.Radius, 100);
                     radius = _androidButton.Width * radius;
-                    _myButton.CornerRadius = (int) radius;
+                    _myButton.CornerRadius = (int)radius;
                 }
             }
         }
@@ -71,15 +77,16 @@ namespace Cycles.Droid
 
             if (_myButton != null)
             {
-                //_androidButton.SetWidth(_androidButton.Width + ((int)_myButton.Padding.Left + (int)_myButton.Padding.Right));
-                //_androidButton.SetPadding((int)_myButton.Padding.Left, (int)_myButton.Padding.Top,
-                //    (int)_myButton.Padding.Right, (int)_myButton.Padding.Bottom);
-                
+                //         _androidButton.SetPadding((int)_myButton.Padding.Left, (int)_myButton.Padding.Top,
+                //(int)_myButton.Padding.Right, (int)_myButton.Padding.Bottom);
+                //         _androidButton.SetWidth(_androidButton.Width + ((int)_myButton.Padding.Left + (int)_myButton.Padding.Right));
+
+
                 _androidButton.SetIncludeFontPadding(false);
             }
-            //_androidButton.SetPadding((int) _myButton.Padding.Left, (int) _myButton.Padding.Top,
-            //    (int) _myButton.Padding.Right, (int) _myButton.Padding.Bottom);
-            _androidButton.SetMinimumHeight(0);
+        //_androidButton.SetPadding((int) _myButton.Padding.Left, (int) _myButton.Padding.Top,
+        //    (int) _myButton.Padding.Right, (int) _myButton.Padding.Bottom);
+        _androidButton.SetMinimumHeight(0);
             _androidButton.SetMinimumWidth(0);
         }
 

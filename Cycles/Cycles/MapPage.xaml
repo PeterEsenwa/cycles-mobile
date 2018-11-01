@@ -12,6 +12,9 @@
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <ProgressBar x:Name="progressBar"
                      Grid.Row="0"
                      Grid.Column="0"
@@ -30,16 +33,15 @@
                          IsShowingUser="True"
                          IsVisible="False"
                          MapType="Street"
-                         VerticalOptions="FillAndExpand" />
-        <views:SizedButton Grid.Row="0"
+                         VerticalOptions="Start" />
+        <!--<views:SizedButton Grid.Row="0"
                            Grid.Column="1"
                            Margin="{Utils:ResponsiveThickness Size=Large,
                                                               Top=0,
                                                               Left=0,
                                                               Right=0,
                                                               Bottom=18}"
-                           Padding="{Utils:ResponsiveThickness Size=Large,
-                                                               Uniform=8}"
+                           Padding="0"
                            BackgroundColor="White"
                            BorderColor="{StaticResource ButtonBGColorNormalRed}"
                            BorderWidth="2"
@@ -55,18 +57,19 @@
                                                               Left=0,
                                                               Right=0,
                                                               Bottom=18}"
-                           Padding="{Utils:ResponsiveThickness Size=Large,
+                           Padding="{Utils:ResponsiveThickness Size=Medium,
                                                                Uniform=8}"
                            BackgroundColor="White"
                            BorderColor="{StaticResource SButtonBDColorNormalGreen}"
                            BorderWidth="2"
                            Clicked="StartRide_Clicked"
+                           ContentLayout="Right, 8"
                            HorizontalOptions="End"
                            Image="go_bike"
                            IsRound="True"
                            Radius="5"
                            Text="Start Ride"
-                           VerticalOptions="End" />
+                           VerticalOptions="End" />-->
     </Grid>
 
 </ContentPage>

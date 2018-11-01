@@ -77,14 +77,14 @@
       <Version>4.5.0.6</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials" Version="0.10.0-preview" />
-    <PackageReference Include="Xamarin.Forms" Version="3.1.0.697729" />
+    <PackageReference Include="Xamarin.Forms" Version="3.3.0.912540" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Android.Support.v4" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Forms.Maps">
-      <Version>3.1.0.697729</Version>
+      <Version>3.3.0.912540</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +93,7 @@
     <Compile Include="Effects\EntryShadowEffect.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Renderers\CyclesMapRenderer.cs" />
+    <Compile Include="Renderers\MapPageRenderer.cs" />
     <Compile Include="Renderers\PBEntryRenderer.cs" />
     <Compile Include="Renderers\SizedButtonRenderer.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />

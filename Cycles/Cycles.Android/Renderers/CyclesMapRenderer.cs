@@ -78,8 +78,7 @@ namespace Cycles.Droid.Renderers
         }
         public Android.Views.View GetInfoContents(Marker marker)
         {
-            var inflater = Android.App.Application.Context.GetSystemService(Context.LayoutInflaterService) as Android.Views.LayoutInflater;
-            if (inflater != null)
+            if (Android.App.Application.Context.GetSystemService(Context.LayoutInflaterService) is LayoutInflater inflater)
             {
                 //Android.Views.View view = new Android.Views.View(this);
 

@@ -24,7 +24,7 @@ namespace Cycles.Utils
         {
             if (!Uniform.Equals(0))
             {
-                double uniformDouble = Uniform * Device.GetNamedSize(Size, typeof(Label));
+                double uniformDouble = (Uniform / 14) * Device.GetNamedSize(Size, typeof(Label));
                 return new Thickness(uniformDouble);
             }
             else if (!Left.Equals(0) || !Right.Equals(0) || !Top.Equals(0) || !Bottom.Equals(0))

@@ -189,49 +189,7 @@ namespace Cycles
                     });
                 });
 
-                Task locationTask = Task.Run(() =>
-                {
-                    Device.StartTimer(TimeSpan.FromSeconds(30), () =>
-                    {
-                        return Task.Run(async () =>
-                        {
-                            //GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromMilliseconds(25000));
-                            //startLocation = await Geolocation.GetLocationAsync(request).ConfigureAwait(false);
-                            //endLocation = new Location();
-
-                            //if (startLocation == null && IsRideOngoing)
-                            //{
-                            //    return true;
-                            //}
-                            //if (startLocation != null && IsRideOngoing)
-                            //{
-                            //    Task<Location> endLocationTask = Geolocation.GetLocationAsync(request)
-                            //        .ContinueWith(t => endLocation = t.Result);
-                            //    endLocation = await endLocationTask.ConfigureAwait(false);
-                            //    TotalDistance += Location.CalculateDistance(startLocation, endLocation, DistanceUnits.Kilometers);
-                            //    return true;
-                            //}
-                            //if (!IsRideOngoing)
-                            //{
-                            //    IsCalculatingDist = true;
-                            //    await DisplayAlert("Ride Ended", "Distance covered " + TotalDistance + "km", "OK");
-                            //    IsCalculatingDist = false;
-                            //    return false;
-                            //}
-                            //return false;
-                            //seconds = seconds + 1;
-                            // Ensure that seconds is less than TimeSpan.MaxValue.TotalSeconds to avoid an exception
-                            //TimeSpan time = TimeSpan.FromSeconds(seconds);
-
-                            //here backslash is must to tell that colon is
-                            //not the part of format, it just a character that we want in output
-                            //string str = time.ToString(@"hh\:mm\:ss");
-                            //Console.WriteLine(str);
-                            //return true;
-
-                        }).Result;
-                    });
-                });
+                
             }
             else
             {
