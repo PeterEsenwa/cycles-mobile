@@ -10,6 +10,9 @@ using Xamarin.Forms.Maps;
 using Xamarin.Forms.Maps.Android;
 using Android.Views;
 using System;
+using Cycles.Models;
+using Cycles.Utils;
+using Android.Util;
 
 [assembly: ExportRenderer(typeof(CyclesMap), typeof(CyclesMapRenderer))]
 namespace Cycles.Droid.Renderers
@@ -17,6 +20,9 @@ namespace Cycles.Droid.Renderers
     internal class CyclesMapRenderer : MapRenderer, GoogleMap.IInfoWindowAdapter
     {
         List<CustomPin> customPins;
+        public List<LatLng> lines;
+
+        public List<Position> routeCoordinates { get; private set; }
 
         public CyclesMapRenderer(Context context) : base(context)
         {
@@ -35,18 +41,63 @@ namespace Cycles.Droid.Renderers
             if (e.NewElement != null)
             {
                 CyclesMap formsMap = (CyclesMap)e.NewElement;
+                routeCoordinates = formsMap.RouteCoordinates;
+                lines = formsMap.Lines;
+                formsMap.RoutesListUpdated += FormsMap_RoutesListUpdated;
                 customPins = formsMap.CustomPins;
-                ((MapView)Control).GetMapAsync(this);
+                Control.GetMapAsync(this);
+            }
+        }
+
+        //public void LoadRoutes(OverviewPolyline overview_polyline)
+        //{
+        //    lines = DirectionsMethods.DecodePolyline(overview_polyline.points);
+        //    FormsMap_RoutesListUpdated(this, EventArgs.Empty);
+        //}
+
+        private void FormsMap_RoutesListUpdated(object sender, EventArgs e)
+        {
+            if (NativeMap != null)
+            {
+
+                var polylineOptions = new PolylineOptions()
+                                .InvokeColor(0x66FF0000)
+                                .InvokeWidth(6);
+
+                foreach (LatLng line in lines)
+                {
+                    polylineOptions.Add(line);
+                }
+
+                //googleMap.AddPolyline(polylineOptions);
+
+
+                //var polylineOptions = new PolylineOptions();
+                //polylineOptions.InvokeColor(0x66FF0000);
+
+                //foreach (var position in routeCoordinates)
+                //{
+                //    polylineOptions.Add(new LatLng(position.Latitude, position.Longitude));
+                //}
+
+                NativeMap.AddPolyline(polylineOptions);
             }
         }
 
         protected override void OnMapReady(GoogleMap map)
         {
+            int bottom = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
+            int left = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
+            int right = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
+            int top = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
+            map.SetPadding(left, top, right, bottom);
+            map.SetMapStyle(MapStyleOptions.LoadRawResourceStyle(Context, Resource.Raw.my_map_customization));
             base.OnMapReady(map);
-
+            
             NativeMap.InfoWindowClick += OnInfoWindowClick;
             NativeMap.SetInfoWindowAdapter(this);
         }
+
         protected override MarkerOptions CreateMarker(Pin pin)
         {
             var marker = new MarkerOptions();

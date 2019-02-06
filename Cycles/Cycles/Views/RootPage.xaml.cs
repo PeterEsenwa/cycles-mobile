@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cycles.Droid;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ namespace Cycles.Views
         {
             InitializeComponent();
             MasterPage.ListView.ItemSelected += ListView_ItemSelected;
+            MessagingCenter.Subscribe<MainActivity>(this, "openMenu", (sender) => { IsPresented = true; });
         }
 
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -30,7 +32,6 @@ namespace Cycles.Views
 
             NavigationPage detailPage = new NavigationPage(page)
             {
-                BarBackgroundColor = Color.Red
             };
             Detail = detailPage;
             IsPresented = false;

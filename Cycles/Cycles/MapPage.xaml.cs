@@ -1,29 +1,45 @@
-﻿using Cycles.Views;
+﻿
+using Cycles.Utils;
+using Cycles.Views;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
+using NetworkAccess = Xamarin.Essentials.NetworkAccess;
 
 namespace Cycles
 {
     public partial class MapPage : ContentPage
     {
+        private static readonly string TAG = typeof(Droid.MainActivity).FullName;
         private ExceptionDispatchInfo capturedException;
+
         public MapPage()
         {
             try
             {
                 InitializeComponent();
-                Device.StartTimer(TimeSpan.FromSeconds(.25), () =>
+#if __ANDROID__
+                NavigationPage.SetHasNavigationBar(this, false);
+#endif
+#if __IOS__
+                StackLayout NavStack = new StackLayout()
+                {
+                    Children = {
+                        new Label() { Text="Cycles" }
+                    }
+                };
+                NavigationPage.SetTitleView(this, NavStack);
+#endif
+                Device.StartTimer(TimeSpan.FromSeconds(.5), () =>
                 {
                     if (progressBar.Progress < 1)
                     {
-                        Device.BeginInvokeOnMainThread(() => progressBar.ProgressTo(progressBar.Progress + 0.0025, 250, Easing.Linear));
+                        Device.BeginInvokeOnMainThread(() => progressBar.ProgressTo(progressBar.Progress + 0.005, 500, Easing.Linear));
                         return true;
                     }
                     return false;
@@ -46,29 +62,42 @@ namespace Cycles
                 Address = "Cafeteria 2, Goodness Rd, Canaan Land, Ota",
                 Id = "P2"
             };
-            map.CustomPins = new List<CustomPin> { pin };
+            CustomPin pin2 = new CustomPin
+            {
+                Type = PinType.Place,
+                PinType = CustomPin.CustomType.Park,
+                Position = new Position(6.67369, 3.15922),
+                Label = "Cycles Point @CST",
+                Address = "College of Science and Tech, CU, Canaan Land, Ota",
+                Id = "P3"
+            };
+            map.CustomPins = new List<CustomPin> { pin, pin2 };
             map.Pins.Add(pin);
+            map.Pins.Add(pin2);
         }
 
-        protected override async void OnAppearing()
+        protected override async void OnSizeAllocated(double width, double height)
         {
-            base.OnAppearing();
+            base.OnSizeAllocated(width, height);
             if (capturedException != null)
             {
                 bool action = await DisplayAlert("Alert", "You need to allow Location access to the app", "Go", "Close app");
                 capturedException.Throw();
             }
             await PrepareMap();
-
         }
+
         public bool IsRideOngoing { get; set; } = false;
         public bool IsCalculatingDist { get; set; } = false;
         private async Task PrepareMap()
         {
             try
             {
-                GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromMilliseconds(30000));
+                GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(45));
+
+
                 Location location = await Geolocation.GetLocationAsync(request);
+                Debug.WriteLine(location?.ToString() ?? "no location**********************************************************************************************");
 
                 if (location != null)
                 {
@@ -80,20 +109,32 @@ namespace Cycles
                 }
                 else
                 {
-                    bool retry = await DisplayAlert("Network Issue", "We couldn't get your location. Please check your network", "RETRY", "CLOSE APP");
+                    bool retry = await DisplayAlert("Network Issue", "We couldn't get your location. Please check your network", "RETRY", "USE LAST KNOWN");
                     if (retry)
                     {
                         await PrepareMap();
                     }
                     else
                     {
-                        Application.Current.Quit();
+                        location = await Geolocation.GetLastKnownLocationAsync();
+                        if (location != null)
+                        {
+                            await progressBar.ProgressTo(1, 250, Easing.CubicInOut);
+                            progressBar.IsVisible = false;
+                            map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(location.Latitude, location.Longitude),
+                                                     Distance.FromKilometers(.1)));
+                            map.IsVisible = true;
+                        }
+                        else
+                        {
+                            await PrepareMap();
+                        }
                     }
                 }
             }
             catch (FeatureNotSupportedException fnsEx)
             {
-                bool action = await DisplayAlert("Not Correct", "You need to allow Location access to the app", "Go", "Close app");
+                bool action = await DisplayAlert("Something went wrong", "You need to allow Location access to the app", "Go", "Close app");
                 // Handle not supported on device exception
             }
             catch (PermissionException pEx)
@@ -108,58 +149,53 @@ namespace Cycles
             }
         }
 
-        private async void SizedButton_Clicked(object sender, EventArgs e)
+        public async void SizedButton_Clicked(object sender, EventArgs e)
         {
             //JsonValue value = JsonValue.Parse(@"{ ""name"":""Prince Charming"", ...");
             //JsonObject result = value as JsonObject;
-            Location location = await Geolocation.GetLastKnownLocationAsync();
-            double shortestDistance = 0;
-            Location neareatPark = new Location();
-            foreach (Pin pin in map.Pins)
+            Location startLocation = await Geolocation.GetLastKnownLocationAsync();
+            NetworkAccess current = Connectivity.NetworkAccess;
+            if (current == NetworkAccess.Internet)
             {
-                Location locationEnd = new Location(pin.Position.Latitude, pin.Position.Longitude);
-                double tempDistance = Location.CalculateDistance(location, locationEnd, DistanceUnits.Kilometers);
-                if (shortestDistance == 0)
+                double shortestDistance = 0;
+                Models.Directions directions = new Models.Directions();
+                Location neareatPark = new Location();
+                foreach (Pin pin in map.Pins)
                 {
-                    neareatPark = locationEnd;
+                    Location endLocation = new Location(pin.Position.Latitude, pin.Position.Longitude);
+                    Models.Directions tempDirections = await DirectionsMethods.GetDirectionsInfo(startLocation.Latitude, endLocation.Latitude, startLocation.Longitude, endLocation.Longitude);
+                    if (tempDirections != null)
+                    {
+                        double tempDistance = DirectionsMethods.GetDistance(tempDirections);
+                        if (shortestDistance == 0 || shortestDistance > tempDistance)
+                        {
+                            neareatPark = endLocation;
+                            shortestDistance = tempDistance;
+                            directions = tempDirections;
+                        }
+                    }
+
                 }
-                else
+                //map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(neareatPark.Latitude, neareatPark.Longitude),
+                //                                Distance.FromKilometers(.1)));
+                //foreach (Models.Route route in directions.Routes)
+                //{
+                //    foreach (Models.Leg leg in route.legs)
+                //    {
+                //        map.LoadRoutes(leg.steps);
+                //    }
+                //}
+                foreach (Models.Route route in directions.Routes)
                 {
-                    neareatPark = (tempDistance < shortestDistance) ? locationEnd : neareatPark;
-                    shortestDistance = (tempDistance < shortestDistance) ? tempDistance : shortestDistance;
+                    map.LoadRoutes(route.overview_polyline);
                 }
+
             }
-            map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(neareatPark.Latitude, neareatPark.Longitude),
-                                            Distance.FromKilometers(.1)));
         }
 
-        private Location startLocation;
-        private Location endLocation;
-        private double TotalDistance = 0;
         private Image tempImage = new Image();
-        private async void StartRide_Clicked(object sender, EventArgs e)
+        public void StartRide_Clicked(object sender, EventArgs e)
         {
-            //JsonValue value = JsonValue.Parse(@"{ ""name"":""Prince Charming"", ...");
-            //JsonObject result = value as JsonObject;
-            //double shortestDistance = 0;
-            //Location neareatPark = new Location();
-            //foreach (Pin pin in map.Pins)
-            //{
-            //    Location locationEnd = new Location(pin.Position.Latitude, pin.Position.Longitude);
-            //    double tempDistance = Location.CalculateDistance(location, locationEnd, DistanceUnits.Kilometers);
-            //    if (shortestDistance == 0)
-            //    {
-            //        neareatPark = locationEnd;
-            //    }
-            //    else
-            //    {
-            //        neareatPark = (tempDistance < shortestDistance) ? locationEnd : neareatPark;
-            //        shortestDistance = (tempDistance < shortestDistance) ? tempDistance : shortestDistance;
-            //    }
-            //}
-            //map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(neareatPark.Latitude, neareatPark.Longitude),
-            //                                Distance.FromKilometers(.1)));
-
             SizedButton rideBtn = ((SizedButton)sender);
             if (!IsRideOngoing)
             {
@@ -189,38 +225,39 @@ namespace Cycles
                     });
                 });
 
-                
+
             }
             else
             {
                 IsRideOngoing = false;
             }
 
+
         }
 
-        private string GET(string url)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            try
-            {
-                WebResponse response = request.GetResponse();
-                using (Stream responseStream = response.GetResponseStream())
-                {
-                    StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.UTF8);
-                    return reader.ReadToEnd();
-                }
-            }
-            catch (WebException ex)
-            {
-                WebResponse errorResponse = ex.Response;
-                using (Stream responseStream = errorResponse.GetResponseStream())
-                {
-                    StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.GetEncoding("utf-8"));
-                    String errorText = reader.ReadToEnd();
-                    // log errorText
-                }
-                throw ex;
-            }
-        }
+        //private string GET(string url)
+        //{
+        //    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+        //    try
+        //    {
+        //        WebResponse response = request.GetResponse();
+        //        using (Stream responseStream = response.GetResponseStream())
+        //        {
+        //            StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.UTF8);
+        //            return reader.ReadToEnd();
+        //        }
+        //    }
+        //    catch (WebException ex)
+        //    {
+        //        WebResponse errorResponse = ex.Response;
+        //        using (Stream responseStream = errorResponse.GetResponseStream())
+        //        {
+        //            StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.GetEncoding("utf-8"));
+        //            String errorText = reader.ReadToEnd();
+        //            // log errorText
+        //        }
+        //        throw ex;
+        //    }
+        //}
     }
 }

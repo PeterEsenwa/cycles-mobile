@@ -23,8 +23,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)MapPage.xaml.cs">
       <DependentUpon>MapPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\DirectionsAPIModels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\DirectionsMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\FontHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\InitPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\IAndroidMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\IPermissionsHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ResponsiveThickness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\RoundedCornersEffect.cs" />

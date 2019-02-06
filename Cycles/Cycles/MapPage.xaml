@@ -33,7 +33,7 @@
                          IsShowingUser="True"
                          IsVisible="False"
                          MapType="Street"
-                         VerticalOptions="Start" />
+                         VerticalOptions="Fill" />
         <!--<views:SizedButton Grid.Row="0"
                            Grid.Column="1"
                            Margin="{Utils:ResponsiveThickness Size=Large,

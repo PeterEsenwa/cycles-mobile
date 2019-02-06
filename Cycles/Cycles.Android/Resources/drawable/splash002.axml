@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+  <item>
+    <color android:color="#FFF"/>
+  </item>
+
+  <!--<item>
+    <bitmap android:gravity="center"
+           android:src="@drawable/splash_dark_rect"
+           android:tileMode="disabled"
+    />
+    -->
+  <!--<scale xmlns:android="http://schemas.android.com/apk/res/android"
+          android:scaleGravity="center_vertical|center_horizontal"
+           android:drawable="@drawable/splash_dark_rect"
+           android:scaleHeight="70%"
+           android:scaleWidth="70%"
+    />-->
+  <!--
+  </item>-->
+
+  <item android:top="10dp"
+        android:left="10dp">
+    <bitmap android:gravity="top|left"
+            android:src="@drawable/cycles_logo"
+            android:tileMode="disabled"
+    />
+  </item>
+  <!--<item>
+    <bitmap android:gravity="center"
+            android:src="@drawable/splash_logo"
+            android:tileMode="disabled"
+    />
+  </item>-->
+</layer-list>

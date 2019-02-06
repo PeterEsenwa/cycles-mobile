@@ -3,6 +3,9 @@
 
   <style name="MainTheme" parent="MainTheme.Base">
     <item name="android:windowNoTitle">true</item>
+    <item name="android:navigationBarColor">#FFFFFF</item>
+
+    <item name="android:windowLightNavigationBar">true</item>
   </style>
   <!-- Base theme applied no matter what API -->
   <style name="MainTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
@@ -31,7 +34,7 @@
   <style name="Splash" parent="Theme.AppCompat.Light.NoActionBar">
     <item name="android:background">@drawable/splash_screen</item>
     <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">true</item>
+    <item name="android:windowFullscreen">false</item>
     <item name="android:colorActivatedHighlight">#E46F74</item>
 
     <item name="colorPrimary">#FFFFFF</item>
@@ -39,6 +42,13 @@
     <item name="colorPrimaryDark">#BA1437</item>
 
     <item name="colorAccent">#262626</item>
+    <item name="android:statusBarColor">#FFFFFF</item>
+
+    <item name="android:windowLightStatusBar">true</item>
+
+    <item name="android:navigationBarColor">#FFFFFF</item>
+
+    <item name="android:windowLightNavigationBar">true</item>
   </style>
 
 

@@ -2,6 +2,8 @@
 using Android;
 using Android.App;
 using Android.Content.PM;
+using Android.Gms.Common.Apis;
+using Android.Gms.Location;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -20,6 +22,8 @@ namespace Cycles.Droid
     [Activity(Label = "Cycles", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        public const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+        public const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
         private readonly string[] PermissionsLocation =
         {
           Manifest.Permission.AccessCoarseLocation,
@@ -29,7 +33,55 @@ namespace Cycles.Droid
 
         public bool CanProceed { get; set; }
 
+        public static Window window;
+        public static MainActivity activity;
         App app;
+
+        protected override async void OnStart()
+        {
+            window = Window;
+            activity = this;
+            base.OnStart();
+            await CheckLocation(this);
+        }
+
+        private static async System.Threading.Tasks.Task CheckLocation(Activity currentActivity)
+        {
+            try
+            {
+                GoogleApiClient
+                    googleApiClient = new GoogleApiClient.Builder(currentActivity)
+                        .AddApi(LocationServices.API)
+                        .Build();
+
+                googleApiClient.Connect();
+
+                LocationRequest
+                    locationRequest = LocationRequest.Create()
+                        .SetPriority(LocationRequest.PriorityHighAccuracy)
+                        .SetInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
+                        .SetFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+
+                LocationSettingsRequest.Builder
+                    locationSettingsRequestBuilder = new LocationSettingsRequest.Builder()
+                        .AddLocationRequest(locationRequest);
+
+                locationSettingsRequestBuilder.SetAlwaysShow(true);
+
+                LocationSettingsResult
+                    locationSettingsResult = await LocationServices.SettingsApi.CheckLocationSettingsAsync(
+                        googleApiClient, locationSettingsRequestBuilder.Build());
+
+                if (locationSettingsResult.Status.StatusCode == LocationSettingsStatusCodes.ResolutionRequired)
+                {
+                    locationSettingsResult.Status.StartResolutionForResult(currentActivity, 0);
+                }
+            }
+            catch (Exception exception)
+            {
+                // Log exception
+            }
+        }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -127,6 +179,19 @@ namespace Cycles.Droid
             {
                 base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             }
+        }
+
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            switch (item.ItemId)
+            {
+                case Android.Resource.Id.Home:
+                    MessagingCenter.Send<MainActivity>(this, "openMenu");
+                    break;
+                default:
+                    break;
+            }
+            return base.OnOptionsItemSelected(item);
         }
     }
 }
