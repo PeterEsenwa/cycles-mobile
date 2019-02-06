@@ -32,7 +32,7 @@
 
 
   <style name="Splash" parent="Theme.AppCompat.Light.NoActionBar">
-    <item name="android:background">@drawable/splash_screen</item>
+    <item name="android:windowBackground">@drawable/splash_screen</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:colorActivatedHighlight">#E46F74</item>

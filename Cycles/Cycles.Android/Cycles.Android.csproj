@@ -130,6 +130,13 @@
     <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
     <AndroidResource Include="Resources\raw\my_map_customization.json" />
+    <AndroidAsset Include="Resources\font\montserrat_bold.ttf" />
+    <AndroidAsset Include="Resources\font\montserrat_italic.ttf" />
+    <AndroidAsset Include="Resources\font\montserrat_light.ttf" />
+    <AndroidAsset Include="Resources\font\montserrat_medium.ttf" />
+    <AndroidAsset Include="Resources\font\montserrat_medium_italic.ttf" />
+    <AndroidAsset Include="Resources\font\montserrat_regular.ttf" />
+    <AndroidAsset Include="Resources\font\montserrat_semi_bold.ttf" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\Tabbar.axml" />
@@ -325,6 +332,18 @@
     <AndroidResource Include="Resources\drawable\splash002.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\font\montserrat.xml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\welcome_to_txt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\cycles_text.png" />
   </ItemGroup>
   <Import Project="..\Cycles\Cycles.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

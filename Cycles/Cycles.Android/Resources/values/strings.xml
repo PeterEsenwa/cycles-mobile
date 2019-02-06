@@ -3,5 +3,6 @@
   <string name="app_name">Cycles</string>
   <string name="noti_chan_ride">Ride</string>
   <string name="welcome_text">Welcome to</string>
+  <string name="cycles_text">Cycles</string>
   
 </resources>

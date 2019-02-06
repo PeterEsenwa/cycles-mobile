@@ -13,8 +13,17 @@
 		android:src="@drawable/cycles_logo"
 		android:background="@android:color/white"
 	/>
-	<TextView android:id="@+id/WelcomeTo" 
-		android:text="@string/welcome_text"
-		android:foreground="@color/cyclesBlack"
-		/>
+	<LinearLayout
+		android:id="@+id/welcome_holder"
+		android:layout_toRightOf="@id/cycles_logo"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:orientation="vertical"
+		android:layout_marginLeft="16dp"
+		android:minWidth="25px"
+		android:minHeight="25px"
+		
+		>
+	
+	</LinearLayout>
 </RelativeLayout>
