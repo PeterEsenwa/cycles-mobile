@@ -16,26 +16,38 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Login.xaml.cs">
-      <DependentUpon>Login.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MapPage.xaml.cs">
       <DependentUpon>MapPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Models\DirectionsAPIModels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\TermsAndPrivacy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\ToolbarEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\DirectionsMethods.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utils\FontHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\InitPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\IAndroidMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\IPermissionsHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ResponsiveThickness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\RoundedCornersEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ShadowEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\CustomTabView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\CustomBarcodeScanner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\CustomLabel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\CustomPin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\CyclesMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Dashboard.xaml.cs">
+      <DependentUpon>Dashboard.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Views\GiftPopup.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Views\HowTo.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\PaddingBorderEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Privacy.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\RootPage.xaml.cs">
       <DependentUpon>RootPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -51,13 +63,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Views\RootPageMenuItem.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Settings.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\SizedButton.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Login.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Terms.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\RootPage.xaml">
@@ -73,6 +85,62 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\RootPageDetail.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\Dashboard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\GiftPopup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="C:\Users\Dell Inspiron 15\Documents\Source\Repos\Cycles\cycles-mobile\Cycles\Cycles\Views\GiftPopup.xaml.cs">
+      <DependentUpon>GiftPopup.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="C:\Users\Dell Inspiron 15\Documents\Source\Repos\Cycles\cycles-mobile\Cycles\Cycles\Views\HowTo.xaml.cs">
+      <DependentUpon>HowTo.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="C:\Users\Dell Inspiron 15\Documents\Source\Repos\Cycles\cycles-mobile\Cycles\Cycles\Views\Privacy.xaml.cs">
+      <DependentUpon>Privacy.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="C:\Users\Dell Inspiron 15\Documents\Source\Repos\Cycles\cycles-mobile\Cycles\Cycles\Views\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="C:\Users\Dell Inspiron 15\Documents\Source\Repos\Cycles\cycles-mobile\Cycles\Cycles\Views\Terms.xaml.cs">
+      <DependentUpon>Terms.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="C:\Users\Dell Inspiron 15\Documents\Source\Repos\Cycles\cycles-mobile\Cycles\Cycles\Views\TermsAndPrivacy.xaml.cs">
+      <DependentUpon>TermsAndPrivacy.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\HowTo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\Privacy.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\Terms.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>

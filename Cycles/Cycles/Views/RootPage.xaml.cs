@@ -1,9 +1,5 @@
 ﻿using Cycles.Droid;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -16,8 +12,12 @@ namespace Cycles.Views
         public RootPage()
         {
             InitializeComponent();
+            NavigationPage.SetHasNavigationBar(this, false);
             MasterPage.ListView.ItemSelected += ListView_ItemSelected;
-            MessagingCenter.Subscribe<MainActivity>(this, "openMenu", (sender) => { IsPresented = true; });
+            MessagingCenter.Subscribe<MainActivity>(this, "openMenu", (sender) =>
+            {
+                IsPresented = true;
+            });
         }
 
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -33,6 +33,7 @@ namespace Cycles.Views
             NavigationPage detailPage = new NavigationPage(page)
             {
             };
+            NavigationPage.SetHasNavigationBar(detailPage, false);
             Detail = detailPage;
             IsPresented = false;
 

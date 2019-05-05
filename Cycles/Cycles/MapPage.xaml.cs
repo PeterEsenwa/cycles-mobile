@@ -1,4 +1,4 @@
-﻿
+﻿using Cycles.Droid.Renderers;
 using Cycles.Utils;
 using Cycles.Views;
 using System;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
+using Cycles.Droid;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -16,7 +17,6 @@ namespace Cycles
     public partial class MapPage : ContentPage
     {
         private static readonly string TAG = typeof(Droid.MainActivity).FullName;
-        private ExceptionDispatchInfo capturedException;
 
         public MapPage()
         {
@@ -30,7 +30,7 @@ namespace Cycles
                 StackLayout NavStack = new StackLayout()
                 {
                     Children = {
-                        new Label() { Text="Cycles" }
+                        new Label() { Text = "Cycles" }
                     }
                 };
                 NavigationPage.SetTitleView(this, NavStack);
@@ -39,18 +39,20 @@ namespace Cycles
                 {
                     if (progressBar.Progress < 1)
                     {
-                        Device.BeginInvokeOnMainThread(() => progressBar.ProgressTo(progressBar.Progress + 0.005, 500, Easing.Linear));
+                        Device.BeginInvokeOnMainThread(() =>
+                            progressBar.ProgressTo(progressBar.Progress + 0.005, 500, Easing.Linear));
                         return true;
                     }
+
                     return false;
                 });
             }
             catch (Exception ex)
             {
-                capturedException = ExceptionDispatchInfo.Capture(ex);
                 Console.WriteLine(ex.Message);
-                capturedException.Throw();
+                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
             }
+
             BindingContext = this;
 
             CustomPin pin = new CustomPin
@@ -74,42 +76,62 @@ namespace Cycles
             map.CustomPins = new List<CustomPin> { pin, pin2 };
             map.Pins.Add(pin);
             map.Pins.Add(pin2);
+
+            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", async (mapPage) =>
+            {
+                var scanPage = new CustomBarcodeScanner();
+                await Navigation.PushModalAsync(scanPage);
+            });
+            MessagingCenter.Subscribe<MainActivity>(this, "Close Scanner", async (sender) =>
+            {
+                if (Navigation.NavigationStack.Count > 0)
+                {
+                    await Navigation.PopModalAsync();
+                }
+            });
+            MessagingCenter.Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker>(this, "Close Scanner", async (sender) =>
+            {
+                if (Navigation.ModalStack.Count > 0)
+                {
+                    await Navigation.PopModalAsync(); 
+                }
+            });
         }
 
         protected override async void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
-            if (capturedException != null)
-            {
-                bool action = await DisplayAlert("Alert", "You need to allow Location access to the app", "Go", "Close app");
-                capturedException.Throw();
-            }
             await PrepareMap();
         }
 
-        public bool IsRideOngoing { get; set; } = false;
-        public bool IsCalculatingDist { get; set; } = false;
+        private bool IsRideOngoing { get; set; }
+        private bool IsCalculatingDist { get; set; } = false;
+        private Image TempImage { get; set; } = new Image();
+
         private async Task PrepareMap()
         {
             try
             {
-                GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(45));
+                GeolocationRequest request =
+                    new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(45));
 
 
                 Location location = await Geolocation.GetLocationAsync(request);
-                Debug.WriteLine(location?.ToString() ?? "no location**********************************************************************************************");
+                Debug.WriteLine(location?.ToString() ??
+                                "no location**********************************************************************************************");
 
                 if (location != null)
                 {
                     await progressBar.ProgressTo(1, 250, Easing.CubicInOut);
                     progressBar.IsVisible = false;
                     map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(location.Latitude, location.Longitude),
-                                             Distance.FromKilometers(.1)));
+                        Distance.FromKilometers(.1)));
                     map.IsVisible = true;
                 }
                 else
                 {
-                    bool retry = await DisplayAlert("Network Issue", "We couldn't get your location. Please check your network", "RETRY", "USE LAST KNOWN");
+                    bool retry = await DisplayAlert("Network Issue",
+                        "We couldn't get your location. Please check your network", "RETRY", "USE LAST KNOWN");
                     if (retry)
                     {
                         await PrepareMap();
@@ -121,8 +143,9 @@ namespace Cycles
                         {
                             await progressBar.ProgressTo(1, 250, Easing.CubicInOut);
                             progressBar.IsVisible = false;
-                            map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(location.Latitude, location.Longitude),
-                                                     Distance.FromKilometers(.1)));
+                            map.MoveToRegion(MapSpan.FromCenterAndRadius(
+                                new Position(location.Latitude, location.Longitude),
+                                Distance.FromKilometers(.1)));
                             map.IsVisible = true;
                         }
                         else
@@ -134,17 +157,23 @@ namespace Cycles
             }
             catch (FeatureNotSupportedException fnsEx)
             {
-                bool action = await DisplayAlert("Something went wrong", "You need to allow Location access to the app", "Go", "Close app");
+                bool action = await DisplayAlert("Something went wrong", "You need to allow Location access to the app",
+                    "Go", "Close app");
+                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(fnsEx));
                 // Handle not supported on device exception
             }
             catch (PermissionException pEx)
             {
-                bool action = await DisplayAlert("Alert", "You need to allow Location access to the app", "Go", "Close app");
+                bool action = await DisplayAlert("Alert", "You need to allow Location access to the app", "Go",
+                    "Close app");
+                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(pEx));
                 // Handle permission exception
             }
             catch (Exception ex)
             {
-                bool action = await DisplayAlert("Unknown", "You need to allow Location access to the app", "Go", "Close app");
+                bool action = await DisplayAlert("Unknown", "You need to allow Location access to the app", "Go",
+                    "Close app");
+                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
                 // Unable to get location
             }
         }
@@ -163,7 +192,8 @@ namespace Cycles
                 foreach (Pin pin in map.Pins)
                 {
                     Location endLocation = new Location(pin.Position.Latitude, pin.Position.Longitude);
-                    Models.Directions tempDirections = await DirectionsMethods.GetDirectionsInfo(startLocation.Latitude, endLocation.Latitude, startLocation.Longitude, endLocation.Longitude);
+                    Models.Directions tempDirections = await DirectionsMethods.GetDirectionsInfo(startLocation.Latitude,
+                        endLocation.Latitude, startLocation.Longitude, endLocation.Longitude);
                     if (tempDirections != null)
                     {
                         double tempDistance = DirectionsMethods.GetDistance(tempDirections);
@@ -174,8 +204,8 @@ namespace Cycles
                             directions = tempDirections;
                         }
                     }
-
                 }
+
                 //map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(neareatPark.Latitude, neareatPark.Longitude),
                 //                                Distance.FromKilometers(.1)));
                 //foreach (Models.Route route in directions.Routes)
@@ -189,18 +219,16 @@ namespace Cycles
                 {
                     map.LoadRoutes(route.overview_polyline);
                 }
-
             }
         }
 
-        private Image tempImage = new Image();
         public void StartRide_Clicked(object sender, EventArgs e)
         {
             SizedButton rideBtn = ((SizedButton)sender);
             if (!IsRideOngoing)
             {
                 IsRideOngoing = true;
-                tempImage.Source = rideBtn.Image;
+                TempImage.Source = rideBtn.Image;
                 rideBtn.Image = null;
                 rideBtn.Text = "Starting...";
                 int seconds = 0;
@@ -220,19 +248,16 @@ namespace Cycles
                             rideBtn.Text = str;
                             return true;
                         }
-                        rideBtn.Image = (FileImageSource)tempImage.Source;
+
+                        rideBtn.Image = (FileImageSource)TempImage.Source;
                         return false;
                     });
                 });
-
-
             }
             else
             {
                 IsRideOngoing = false;
             }
-
-
         }
 
         //private string GET(string url)

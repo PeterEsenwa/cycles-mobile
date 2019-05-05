@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/mappage_appbar"
+        android:elevation="8dp"
+        app:elevation="8dp"
+        android:translationZ="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+	>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/mappage_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/colorPrimaryDark"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <TextView
+                android:id="@+id/cycles_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cycles_text"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:fontFamily="@font/montserrat_medium"
+                android:layout_gravity="center_horizontal"
+			/>
+
+            <ImageButton
+                android:id="@+id/gift_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:cropToPadding="true"
+                android:background="@color/colorPrimaryDark"
+                android:padding="12dp"
+                android:src="@drawable/gift_image"
+                android:layout_gravity="right|center_vertical"
+			/>
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.SearchView
+            android:id="@+id/map_search"
+            app:queryBackground="@android:color/transparent"
+            android:background="@drawable/map_search_background"
+            app:submitBackground="@color/cyclesBlackRipple"
+            app:iconifiedByDefault="false"
+            app:voiceIcon="@drawable/search_voice"
+            app:searchHintIcon="@null"
+            app:queryHint="Search Community"
+            android:textSize="24sp"
+            android:textColor="@color/cyclesBlack"
+            android:fontFamily="@font/montserrat_regular"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="64dp"
+            android:layout_marginHorizontal="48dp"
+            android:inputType="textCapWords"
+            android:elevation="8dp"
+            android:maxLines="1"
+            android:imeOptions="actionSearch"
+            android:paddingVertical="@dimen/design_snackbar_padding_vertical"
+            android:paddingHorizontal="@dimen/design_snackbar_padding_horizontal"
+		/>
+
+        <RelativeLayout
+            android:id="@+id/map_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="48dp">
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/fabs_holder"
+            android:layout_marginHorizontal="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:background="@android:color/transparent">
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_closest_bicycle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fabSize="mini"
+                app:elevation="8dp"
+                android:elevation="8dp"
+                app:rippleColor="@color/cyclesBlackRipple"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="12dp"
+                android:src="@drawable/closest_bicycle"/>
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_refresh_map"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fabSize="mini"
+                app:elevation="8dp"
+                android:elevation="8dp"
+                android:layout_centerHorizontal="true"
+                app:rippleColor="@color/cyclesBlackRipple"
+                android:layout_below="@id/fab_closest_bicycle"
+                android:src="@drawable/refresh_map"
+                android:layout_margin="12dp" />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_locate_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fabSize="mini"
+                android:layout_below="@id/fab_refresh_map"
+                app:rippleColor="@color/cyclesBlackRipple"
+                android:layout_centerHorizontal="true"
+                app:elevation="8dp"
+                android:elevation="8dp"
+                android:layout_margin="18dp"
+                android:src="@drawable/locate_me_white" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true">
+            <Button
+                android:id="@+id/scan_barcode"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="SCAN"
+                android:textSize="22sp"
+                android:textColor="@color/colorWhite"
+                android:textAlignment="center"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:layout_marginBottom="18dp"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="24dp"
+                android:background="@drawable/verify_button_background"
+                android:drawableLeft="@drawable/qr_code"
+                android:drawablePadding="12dp"
+				/>
+        </LinearLayout>
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

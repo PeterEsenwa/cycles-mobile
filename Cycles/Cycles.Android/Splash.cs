@@ -1,110 +1,430 @@
-﻿using Android.App;
+﻿using Android;
+using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Gms.Auth.Api;
+using Android.Gms.Auth.Api.SignIn;
+using Android.Gms.Common;
+using Android.Gms.Common.Apis;
 using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Preferences;
+using Android.Support.Constraints;
+using Android.Support.Design.Widget;
+using Android.Support.V4.App;
 using Android.Support.V4.Content;
+using Android.Support.V4.View;
+using Android.Util;
+using Android.Views;
 using Android.Widget;
+using Crashlytics;
+using Cycles.Droid.CustomViews;
+using Cycles.Droid.Utils;
+using Firebase;
+using Firebase.Auth;
+
+using Java.Util.Concurrent;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xamarin.Essentials;
+using Xamarin.Facebook;
+using Xamarin.Facebook.Login;
+using Xamarin.Facebook.Login.Widget;
+
+using static Cycles.Droid.Utils.SplashAnimationHelper;
+using static Android.Gms.Common.Apis.GoogleApiClient;
 
 namespace Cycles.Droid
 {
+
     [Activity(Label = "Cycles", Icon = "@mipmap/icon", Theme = "@style/Splash", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class Splash : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public partial class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback
     {
-        //private AnimationDrawable splashDrawable;
-        //private LayerDrawable splashDrawable;
+        #region CONSTANTS
+
+        private const string TAG = "SplashActivity";
+        private const int RC_SIGN_IN = 9001;
+        private const int VERIFICATION_TIMEOUT = 30;
+        private const string first_run = "first_run";
+        private const int REQUEST_LOCATION_ID = 0;
+
+        #endregion
+
+        #region Firebase Properties
+        private FirebaseApp App { get; set; }
+        private FirebaseAuth FirebaseAuth { get; set; }
+        #endregion
+
+        #region Google Properties
+        private GoogleApiClient MGoogleApiClient { get; set; }
+        #endregion
+
+        #region Views and ViewGroups
+        public ImageButton NextButton { get; set; }
+        private Button SkipButton { get; set; }
+        private PhoneVerificationDialog Dialog { get; set; }
+        public ImageView FastFitPath { get; private set; }
+        public Drawable FastFitInitialDrawable { get; private set; }
+        public RelativeLayout SplashBaseLayout { get; private set; }
+        #endregion
+
+        private int CurrentPosition { get; set; } = 1;
+        private ICallbackManager CallbackManager { get; set; }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             ISharedPreferences sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
-            if (!sharedPreferences.GetBoolean("first_run", false))
-            {
-                SetContentView(Resource.Layout.Splash);
-            }
-            else
+
+            Xamarin.Forms.Forms.SetFlags("Visual_Experimental");
+            Xamarin.Forms.Forms.Init(this, savedInstanceState);
+
+            XF.Material.Droid.Material.Init(this, savedInstanceState);
+            Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            Xamarin.Forms.FormsMaterial.Init(this, savedInstanceState);
+
+            Crashlytics.Crashlytics.HandleManagedExceptions();
+
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                 .SetApiKey("AIzaSyBnw6unIyRQ4XfFZNekTpU7rWumSvv5cnw")
+                 .SetApplicationId("1:316655980255:android:05c55f9b9a1c0243")
+                 .Build();
+
+            App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext, options);
+            FirebaseAuth = FirebaseAuth.GetInstance(App);
+
+            bool firstRun = sharedPreferences.Contains(first_run);
+            bool firstRunValue = sharedPreferences.GetBoolean(first_run, true);
+            if (FirebaseAuth.CurrentUser != null && firstRun)
             {
                 StartActivity(new Intent(this, typeof(MainActivity)));
                 Finish();
             }
-            //splashLayout.Background.SetVisible(false, false);
-            //splashLayout.Background.SetAlpha(0);
+            else if (!firstRun)
+            {
+                SetContentView(Resource.Layout.Splash);
+                sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
+                NextButton = FindViewById<ImageButton>(Resource.Id.next_button);
+                SkipButton = FindViewById<Button>(Resource.Id.skip_button);
+                SkipButton.Click += SkipToEnd; ;
+                NextButton.Click += NextButton_Click;
 
+                FindViewById<TextView>(Resource.Id.goto_login).Click += Goto_LoginPage;
+                ConstraintLayout pagesHolder = FindViewById<ConstraintLayout>(Resource.Id.pages_holder);
+                PagesGestureListener gestureListener = new PagesGestureListener(this);
+                GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this, gestureListener);
 
+                pagesHolder.SetOnTouchListener(new PagesGestureRecognizer(gestureDetector));
+                FindViewById<ImageView>(Resource.Id.number_signup).Click += PhoneImageViewBtn_Click;
+                FindViewById<ImageView>(Resource.Id.google_signup).Click += GoogleSignup_Click;
+                FindViewById<ImageView>(Resource.Id.facebook_signup).Click += FacebookSignup_Click;
+                SplashBaseLayout = FindViewById<RelativeLayout>(Resource.Id.base_layout);
 
-            RelativeLayout splashLayout = FindViewById<RelativeLayout>(Resource.Id.relativeLayout1);
+                IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
+                indicators.Number_of_Indicators = 3;
 
-
-
+                FastFitPath = FindViewById<ImageView>(Resource.Id.fast_fit_path_imageview);
+                FastFitInitialDrawable = FastFitPath.Drawable;
+            }
+            else if (firstRun)
+            {
+                sharedPreferences.Edit().Remove(first_run).Apply();
+                StartActivity(new Intent(this, typeof(LoginActivity)));
+                Finish();
+            }
         }
 
-        public bool HasNavBar(Android.Content.Res.Resources resources)
+        #region Click Handlers
+        private void Goto_LoginPage(object sender, EventArgs e)
         {
-            int id = resources.GetIdentifier("config_showNavigationBar", "bool", "android");
-            return id > 0 && resources.GetBoolean(id);
+            StartActivity(new Intent(this, typeof(LoginActivity)));
+            Finish();
         }
 
-        public override void OnWindowFocusChanged(bool hasFocus)
+        private void SkipToEnd(object sender, EventArgs e)
         {
-            base.OnWindowFocusChanged(hasFocus);
-            //splashDrawable.Start();
+            while (CurrentPosition < 3)
+            {
+                DoSplashSwipe(SwipeDirection.Forward);
+            }
         }
+
+        private void FacebookSignup_Click(object sender, EventArgs e)
+        {
+            CallbackManager = CallbackManagerFactory.Create();
+
+            LoginManager.Instance.RegisterCallback(CallbackManager, this);
+
+            LoginManager.Instance.LogInWithReadPermissions(this, new List<string>() { "public_profile", "user_friends" });
+
+            IsLogin_InProgress(true);
+        }
+
+        private void GoogleSignup_Click(object sender, EventArgs e)
+        {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DefaultSignIn)
+                .RequestIdToken("316655980255-fudv9pg2bcs7s89eevadgo82nrj0t83v.apps.googleusercontent.com")
+                    .RequestEmail()
+                    .Build();
+            if (MGoogleApiClient == null)
+            {
+                MGoogleApiClient = new Builder(this)
+                    .EnableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                    .AddApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .Build();
+            }
+            Intent signInIntent = Auth.GoogleSignInApi.GetSignInIntent(MGoogleApiClient);
+            StartActivityForResult(signInIntent, RC_SIGN_IN);
+
+            IsLogin_InProgress(true);
+        }
+
+        private void PhoneImageViewBtn_Click(object sender, EventArgs e)
+        {
+            var phoneNumberDialogHandler = new EventHandler<DialogClickEventArgs>((alertDialog, clicked) =>
+            {
+                var phoneNumberAlertDialog = alertDialog as AlertDialog;
+                Button btnClicked = phoneNumberAlertDialog?.GetButton(clicked.Which);
+
+                if (btnClicked?.Text != GetString(Resource.String.send_code)) return;
+
+                var phoneNumber = phoneNumberAlertDialog?.FindViewById<EditText>(Resource.Id.phoneNumber);
+                var mCallBacks = new PhoneAuthVerificationCallbacks();
+
+                mCallBacks.CodeSent += MCallBacks_CodeSent;
+                mCallBacks.VerificationCompleted += MCallBacks_VerificationCompleted;
+                PhoneAuthProvider.GetInstance(FirebaseAuth).VerifyPhoneNumber(phoneNumber?.Text, VERIFICATION_TIMEOUT, TimeUnit.Seconds, this, mCallBacks);
+            });
+
+            AlertDialog phoneNumberAlert = new AlertDialog.Builder(this)
+                .SetTitle(GetString(Resource.String.input_phone_number))
+                .SetPositiveButton(GetString(Resource.String.send_code), phoneNumberDialogHandler)
+                .SetView(LayoutInflater.Inflate(Resource.Layout.PhoneNumberDialog, null))
+                .Show();
+
+            EditText phoneNumberInput = phoneNumberAlert.FindViewById<EditText>(Resource.Id.phoneNumber);
+            //phoneNumberInput.AddTextChangedListener(new PhoneNumberFormattingTextWatcher("NG"));
+            phoneNumberInput.AddTextChangedListener(new PhoneTextWatcher(phoneNumberInput));
+        }
+
+        private void EmailLayout_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void NextButton_Click(object sender, EventArgs e)
+        {
+            DoSplashSwipe(SwipeDirection.Forward);
+        } 
+        #endregion
+
+        #region Phone number Verification Callbacks
+
+        private async void MCallBacks_VerificationCompleted(object sender, EventArgs e)
+        {
+            IsLogin_InProgress(true);
+            if (e == null)
+            {
+                throw new ArgumentNullException(nameof(e));
+            }
+            else
+            {
+                PhoneAuthCompletedEventArgs verifiedEvent = (PhoneAuthCompletedEventArgs)e;
+                if (Dialog != null)
+                {
+                    Dialog.Dismiss();
+                    Dialog.Dispose();
+                }
+                IAuthResult signinResult = await FirebaseAuth.SignInWithCredentialAsync(verifiedEvent.Credential);
+                if (signinResult != null && signinResult.User != null)
+                {
+                    FirebaseUser user = signinResult.User;
+                    Intent mainactivityIntent = new Intent(this, typeof(MainActivity));
+                    StartActivity(mainactivityIntent);
+                    IsLogin_InProgress(false);
+                    Finish();
+                }
+                else
+                {
+                    Toast.MakeText(this, "Authentication failed.", ToastLength.Long).Show();
+                    IsLogin_InProgress(false);
+                }
+            }
+
+        }
+
+        private void MCallBacks_CodeSent(object sender, EventArgs e)
+        {
+            Dialog = new PhoneVerificationDialog(VERIFICATION_TIMEOUT);
+
+            Android.Support.V4.App.FragmentTransaction ft = SupportFragmentManager.BeginTransaction();
+
+            Dialog.Show(ft, "tatattta");
+        }
+        #endregion
+
+        public void DoSplashSwipe(SwipeDirection direction)
+        {
+            int oldPage = CurrentPosition;
+            if (CurrentPosition >= 3)
+            {
+                return;
+            }
+            int newPage = CurrentPosition += EnumExtension.GetValue(direction);
+
+            //Forward swipe
+            if (direction.Equals(SwipeDirection.Forward))
+            {
+                switch (oldPage)
+                {
+                    case 1 when newPage == 2:
+                    {
+                        var vectorDrawable = FastFitPath.Drawable;
+                        if (vectorDrawable != FastFitInitialDrawable)
+                        {
+                            FastFitPath.SetImageDrawable(FastFitInitialDrawable);
+                        }
+                        (FastFitPath.Drawable as AnimatedVectorDrawable)?.Start();
+                        FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout).MoveToPage(newPage, oldPage);
+                        break;
+                    }
+
+                    case 2 when newPage == 3:
+                    {
+                        AnimateViewOut(SkipButton);
+                        AnimateViewOut(NextButton);
+                        AnimateViewOut(FastFitPath);
+
+                        RelativeLayout socialLayout = FindViewById<RelativeLayout>(Resource.Id.social_options);
+                        TextView createAccount = FindViewById<TextView>(Resource.Id.call_to_create);
+
+                        var finalInAnimation = new Java.Lang.Runnable(() =>
+                        {
+                            TextView haveAccount = FindViewById<TextView>(Resource.Id.have_an_account);
+                            TextView loginText = FindViewById<TextView>(Resource.Id.goto_login);
+
+                            AnimateViewIn(loginText);
+                            AnimateViewIn(haveAccount);
+
+                        });
+
+                        AnimateViewIn(createAccount);
+                        AnimateViewIn(socialLayout, finalInAnimation);
+
+                        IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
+                        indicators.MoveToPage(newPage, oldPage);
+                        break;
+                    }
+                }
+            }
+            else if (direction.Equals(SwipeDirection.Backward))
+            {
+                if (oldPage == 2 && newPage == 1)
+                {
+                    FastFitPath.SetImageDrawable(GetDrawable(Resource.Drawable.fit_fast_animvector));
+                    ((AnimatedVectorDrawable)FastFitPath.Drawable)?.Start();
+                    FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout).MoveToPage(newPage, oldPage);
+                }
+            }
+        }
+
+        public enum SwipeDirection
+        {
+            Forward = +1,
+            Backward = -1
+        }
+
         public override void OnBackPressed() { }
+
+        public void OnConnectionFailed(ConnectionResult result)
+        {
+            Snackbar.Make(SplashBaseLayout, Resource.String.connection_failed, Snackbar.LengthLong);
+        }
+
+        #region Google Auth with Firebase
+        protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            Log.Debug(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
+            if (CallbackManager != null)
+            {
+                CallbackManager.OnActivityResult(requestCode, (int)resultCode, data);
+            }
+            if (requestCode == RC_SIGN_IN)
+            {
+                IsLogin_InProgress(false);
+                GoogleSignInResult result = Auth.GoogleSignInApi.GetSignInResultFromIntent(data);
+                if (result.IsSuccess)
+                {
+                    GoogleSignInAccount userAccount = result.SignInAccount;
+                    var success = await FirebaseAuthHelper.FirebaseAuthWithGoogle(FirebaseAuth, userAccount);
+                    if (success)
+                    {
+                        Intent mainactivityIntent = new Intent(this, typeof(MainActivity));
+                        StartActivity(mainactivityIntent);
+                        Finish();
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Facebook Auth area
+        private void IsLogin_InProgress(bool isTrue)
+        {
+            if (isTrue)
+            {
+                ProgressBar progressBar = FindViewById<ProgressBar>(Resource.Id.indeterminateBar);
+                progressBar.Visibility = ViewStates.Visible;
+                //progressBar.StartAnimation();
+            }
+            else
+            {
+                ProgressBar progressBar = FindViewById<ProgressBar>(Resource.Id.indeterminateBar);
+                progressBar.Visibility = ViewStates.Invisible;
+            }
+        }
+
+        public void OnCancel()
+        {
+            Toast.MakeText(this, "Facebook verification cancelled", ToastLength.Long).Show();
+        }
+
+        public void OnError(FacebookException error)
+        {
+            var fbSignupErrorDialogHandler = new EventHandler<DialogClickEventArgs>((alertDialog, clicked) =>
+            {
+                AlertDialog phoneNumberAlertDialog = alertDialog as AlertDialog;
+                phoneNumberAlertDialog.Dismiss();
+                phoneNumberAlertDialog.Dispose();
+
+            });
+            AlertDialog fbSignupErrorAlert = new AlertDialog.Builder(this)
+                .SetTitle(GetString(Resource.String.fb_signup_error))
+                .SetPositiveButton(GetString(Resource.String.ok_text), fbSignupErrorDialogHandler)
+                .SetMessage(error.Message)
+                .Show();
+        }
+
+        public async void OnSuccess(Java.Lang.Object result)
+        {
+            var success = await FirebaseAuthHelper.FirebaseAuthWithFacebook(FirebaseAuth, ((LoginResult)result).AccessToken);
+            if (success)
+            {
+                IsLogin_InProgress(false);
+                Toast.MakeText(this, "Authentication successful", ToastLength.Long).Show();
+                Intent mainactivityIntent = new Intent(this, typeof(MainActivity));
+                StartActivity(mainactivityIntent);
+                Finish();
+            }
+            else
+            {
+                Toast.MakeText(this, "Authentication failed.", ToastLength.Long).Show();
+                IsLogin_InProgress(false);
+            }
+        }
+        #endregion
     }
-
-
-
-
-
-
-
-
-
-    //splashDrawable = (AnimationDrawable)ContextCompat.GetDrawable(this, Resource.Drawable.splash_screen);
-    //RelativeLayout asteroidImage = FindViewById<RelativeLayout>(Resource.Id.relativeLayout1);
-    //ImageView asteroidImage = FindViewById<ImageView>(Resource.Id.new_image);
-    //asteroidImage.SetBackgroundResource(Resource.Drawable.splash_screen);
-    //BitmapDrawable cyclesLogo = (BitmapDrawable)splashDrawable.GetDrawable(1);
-    //cyclesLogo.SetAlpha(0);
-    //Button asteroidButton = FindViewById<Button>(Resource.Id.new_button);
-    //asteroidButton.Click += (sender, e) =>
-    //{
-    //    splashDrawable.Start();
-    //};
-    //ImageView cycles_logo = (ImageView)FindViewById(Resource.Id.cycles_logo);
-    //Window.SetNavigationBarColor(Color.White);
-    //if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
-    //{
-    //    View decorView = Window.DecorView;
-    //    decorView.SetFitsSystemWindows(false);
-
-    //    var uiOptions = (int)decorView.SystemUiVisibility;
-    //    var newUiOptions = uiOptions;
-
-    //    //window.AddFlags(WindowManagerFlags.TranslucentStatus);
-    //    Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
-    //    //window.SetStatusBarColor(Color.FromHex("#99d7282f").ToAndroid());
-    //    //newUiOptions |= (int)SystemUiFlags.LayoutFullscreen;
-    //    newUiOptions |= (int)SystemUiFlags.LightNavigationBar;
-    //    //newUiOptions |= (int)SystemUiFlags.LayoutStable;
-
-    //    decorView.SystemUiVisibility = (StatusBarVisibility)newUiOptions;
-    //}
-
-    //cyclesLogo.Gravity = Android.Views.GravityFlags.NoGravity;
-    ////cyclesLogo.
-    //int no = splashDrawable.NumberOfLayers;
-    //var h = cyclesLogo.IntrinsicHeight;
-    ////var foo = splashDrawable.GetLayerInsetTop(1);
-    //splashDrawable.SetLayerInset(1, -20, -10, 0, 20);
-    //var foo = splashDrawable.GetDrawable(0);
-    ////var cyclesLogo = (BitmapDrawable)splashDrawable.GetDrawable(1);
-    ////cyclesLogo.Gravity = Android.Views.GravityFlags.Top | Android.Views.GravityFlags.Start;
-    ////foo.SetVisible(false, false);
-    ////cyclesLogo.SetVisible(false, false);
-    //ObjectAnimator animator = ObjectAnimator.OfInt(cyclesLogo, "Alpha", 255, 0);
-    //ObjectAnimator animator2 = ObjectAnimator.OfInt(foo, "alpha", 255, 0);
-    //animator2.SetDuration(1000);
-    //animator2.Start();
-    // Create your application here
 }

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "316655980255",
+    "firebase_url": "https://cyclesdemo.firebaseio.com",
+    "project_id": "cyclesdemo",
+    "storage_bucket": "cyclesdemo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:316655980255:android:05c55f9b9a1c0243",
+        "android_client_info": {
+          "package_name": "com.Kinesys.Cycles"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "316655980255-dv1e21hv5ipbpv6ocjckt1jkmkhe34vt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Kinesys.Cycles",
+            "certificate_hash": "2eeb777773c9b0c2f858d1300eba33104b7f6d86"
+          }
+        },
+        {
+          "client_id": "316655980255-fudv9pg2bcs7s89eevadgo82nrj0t83v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnw6unIyRQ4XfFZNekTpU7rWumSvv5cnw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "316655980255-fudv9pg2bcs7s89eevadgo82nrj0t83v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

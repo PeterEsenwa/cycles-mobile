@@ -5,15 +5,19 @@
     <Application.Resources>
         <Color x:Key="TextColorWhite">#FFFFFF</Color>
         <Color x:Key="TextColorLightBlack">#262626</Color>
+        <Color x:Key="TextColorCyclesBlack">#262626</Color>
+        <Color x:Key="TextColorCyclesGray">#595959</Color>
         <Color x:Key="TextColorNearBlack">#191919</Color>
         <Color x:Key="TextColorMediumGrey">#555555</Color>
         <Color x:Key="TextColorLightGrey">#424242</Color>
+        <Color x:Key="ColorCyclesDarkRed">#BD151B</Color>
 
         <Color x:Key="EntryBGColorWhite">#FFFFFF</Color>
         <Color x:Key="EntryBGColorNearWhite">#D8D8D8</Color>
         <Color x:Key="EntryBGColorNearWhiteT">#CCCECECE</Color>
         <Color x:Key="EntryBGColorNormalRed">#E46F74</Color>
         <Color x:Key="ButtonBGColorNormalRed">#DD4C52</Color>
+        <Color x:Key="ButtonBGColorCyclesRed">#D7282F</Color>
         <Color x:Key="SButtonBDColorNormalGreen">#31B451</Color>
 
         <x:Double x:Key="FontSizeLarge">30</x:Double>

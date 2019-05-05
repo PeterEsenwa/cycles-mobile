@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="Cycles.Views.Dashboard"
+             xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:utils="clr-namespace:Cycles.Utils"
+             xmlns:views="clr-namespace:Cycles.Views"
+             Title="My Dashboard"
+             NavigationPage.HasNavigationBar="False">
+    <ContentPage.Content>
+        <ScrollView x:Name="MainScrollingView"
+                    BackgroundColor="White"
+                    VerticalOptions="StartAndExpand">
+            <StackLayout x:Name="CardsHolder"
+                         HorizontalOptions="Fill"
+                         VerticalOptions="StartAndExpand">
+                <Grid x:Name="SummaryCard"
+                      Margin="{utils:ResponsiveThickness Uniform=24,
+                                                         Top=18,
+                                                         Bottom=12,
+                                                         Size=Medium}"
+                      utils:RoundCornersEffect.CornerRadius="8"
+                      utils:ShadowEffect.HasShadow="True"
+                      utils:ShadowEffect.Radius="12"
+                      utils:ShadowEffect.TranslationZ="8"
+                      BackgroundColor="White"
+                      HeightRequest="160"
+                      HorizontalOptions="Fill"
+                      VerticalOptions="Fill">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".35*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0"
+                           Grid.RowSpan="2"
+                           Aspect="AspectFill"
+                           HorizontalOptions="Fill"
+                           Source="monthly_stats.png"
+                           VerticalOptions="Fill" />
+                    <BoxView Grid.Row="0"
+                             Grid.RowSpan="2"
+                             BackgroundColor="#95ffffff"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Fill" />
+                    <views:CustomLabel Grid.Row="0"
+                                       Margin="{utils:ResponsiveThickness Left=12,
+                                                                          Size=Medium}"
+                                       FontFamily="{StaticResource MontserratBold}"
+                                       FontSizeFactor="1"
+                                       HorizontalOptions="Start"
+                                       NamedFontSize="Medium"
+                                       Text="THIS MONTH"
+                                       TextColor="{StaticResource TextColorCyclesGray}"
+                                       VerticalOptions="CenterAndExpand" />
+                    <Grid Grid.Row="1"
+                          Margin="{utils:ResponsiveThickness Uniform=8,
+                                                             Size=Small}"
+                          Padding="{utils:ResponsiveThickness Uniform=4,
+                                                              Size=Small}"
+                          HorizontalOptions="Fill">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Grid.Column="0"
+                                     Orientation="Vertical"
+                                     VerticalOptions="Center">
+                            <Image Aspect="AspectFit"
+                                   HorizontalOptions="Center"
+                                   Source="moving_bicycle.png"
+                                   VerticalOptions="Center" />
+                            <views:CustomLabel FontFamily="{StaticResource MontserratMedium}"
+                                               FontSizeFactor=".8"
+                                               HorizontalOptions="Center"
+                                               NamedFontSize="Medium"
+                                               Text="12"
+                                               TextColor="{StaticResource TextColorCyclesGray}"
+                                               VerticalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1"
+                                     Orientation="Vertical"
+                                     VerticalOptions="Center">
+                            <Image Aspect="AspectFit"
+                                   HorizontalOptions="Center"
+                                   Source="ride_times.png"
+                                   VerticalOptions="Center" />
+                            <views:CustomLabel FontFamily="{StaticResource MontserratMedium}"
+                                               FontSizeFactor=".8"
+                                               HorizontalOptions="Center"
+                                               NamedFontSize="Medium"
+                                               Text="48mins"
+                                               TextColor="{StaticResource TextColorCyclesGray}"
+                                               VerticalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="2"
+                                     Orientation="Vertical"
+                                     VerticalOptions="Center">
+                            <Image Aspect="AspectFit"
+                                   HorizontalOptions="Center"
+                                   Source="burnt_calories.png"
+                                   VerticalOptions="Center" />
+                            <views:CustomLabel FontFamily="{StaticResource MontserratMedium}"
+                                               FontSizeFactor=".8"
+                                               HorizontalOptions="Center"
+                                               NamedFontSize="Medium"
+                                               Text="127cal"
+                                               TextColor="{StaticResource TextColorCyclesGray}"
+                                               VerticalOptions="Center" />
+                        </StackLayout>
+                    </Grid>
+                </Grid>
+                <Grid x:Name="WalletCard"
+                      Margin="{utils:ResponsiveThickness Uniform=24,
+                                                         Top=4,
+                                                         Bottom=12,
+                                                         Size=Medium}"
+                      utils:RoundCornersEffect.CornerRadius="8"
+                      utils:ShadowEffect.HasShadow="True"
+                      utils:ShadowEffect.Radius="8"
+                      BackgroundColor="White"
+                      HeightRequest="160"
+                      HorizontalOptions="Fill"
+                      VerticalOptions="Fill">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".35*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width=".16*" />
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Row="0"
+                           Grid.RowSpan="2"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Aspect="AspectFill"
+                           HorizontalOptions="Fill"
+                           Source="wallet_and_plans.png"
+                           VerticalOptions="Fill" />
+                    <BoxView Grid.Row="0"
+                             Grid.RowSpan="2"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="2"
+                             BackgroundColor="#35000000"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Fill" />
+                    <views:CustomLabel Grid.Row="0"
+                                       Grid.Column="0"
+                                       Margin="{utils:ResponsiveThickness Left=12,
+                                                                          Size=Medium}"
+                                       FontFamily="{StaticResource MontserratBold}"
+                                       FontSizeFactor="1"
+                                       HorizontalOptions="Start"
+                                       NamedFontSize="Medium"
+                                       Text="BALANCE"
+                                       TextColor="White"
+                                       VerticalOptions="CenterAndExpand" />
+                    <Image Grid.Row="0"
+                           Grid.Column="1"
+                           Aspect="AspectFill"
+                           HorizontalOptions="Center"
+                           Source="settings_cog.png"
+                           VerticalOptions="CenterAndExpand" />
+                    <Grid Grid.Row="1"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="2"
+                          HorizontalOptions="Fill">
+                        <StackLayout Spacing="-2">
+                            <views:CustomLabel Margin="{utils:ResponsiveThickness Left=12,
+                                                                                  Top=8,
+                                                                                  Size=Medium}"
+                                               FontFamily="{StaticResource MontserratMedium}"
+                                               FontSizeFactor=".8"
+                                               HorizontalOptions="Start"
+                                               NamedFontSize="Medium"
+                                               Text="₦300"
+                                               TextColor="White" />
+                            <views:CustomLabel Margin="{utils:ResponsiveThickness Left=12,
+                                                                                  Top=0,
+                                                                                  Size=Medium}"
+                                               FontFamily="{StaticResource MontserratMedium}"
+                                               FontSizeFactor=".8"
+                                               HorizontalOptions="Start"
+                                               NamedFontSize="Medium"
+                                               Text="Plan - Nomad (20/25)"
+                                               TextColor="White" />
+                        </StackLayout>
+                    </Grid>
+                </Grid>
+                <Grid x:Name="HistoryCard"
+                      Margin="{utils:ResponsiveThickness Uniform=24,
+                                                         Top=4,
+                                                         Bottom=4,
+                                                         Size=Medium}"
+                      utils:RoundCornersEffect.CornerRadius="8"
+                      utils:ShadowEffect.HasShadow="True"
+                      utils:ShadowEffect.Radius="4"
+                      BackgroundColor="White"
+                      HeightRequest="200"
+                      HorizontalOptions="Fill">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".233*" />
+                        <RowDefinition Height=".767*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width=".16*" />
+                    </Grid.ColumnDefinitions>
+                    <views:CustomLabel Grid.Row="0"
+                                       Grid.Column="0"
+                                       Margin="{utils:ResponsiveThickness Left=12,
+                                                                          Top=0,
+                                                                          Size=Medium}"
+                                       FontFamily="{StaticResource MontserratBold}"
+                                       FontSizeFactor="1"
+                                       HorizontalOptions="Start"
+                                       NamedFontSize="Medium"
+                                       Text="HISTORY"
+                                       TextColor="{StaticResource TextColorCyclesGray}"
+                                       VerticalOptions="CenterAndExpand" />
+                    <ImageButton Grid.Row="0"
+                                 Grid.Column="1"
+                                 Aspect="AspectFill"
+                                 HorizontalOptions="Center"
+                                 Source="more_horizontal_icon.png"
+                                 VerticalOptions="CenterAndExpand" />
+                    <ListView x:Name="RidesHistory"
+                              Grid.Row="1"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              Margin="{utils:ResponsiveThickness Left=12,
+                                                                 Right=12,
+                                                                 Size=Medium}"
+                              HorizontalOptions="Fill">
+                        <ListView.Resources>
+                            <ResourceDictionary>
+                                <utils:StringSplitterConverter x:Key="StringSplitter" />
+                            </ResourceDictionary>
+                        </ListView.Resources>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell utils:RoundCornersEffect.CornerRadius="12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <views:CustomLabel Grid.Column="0"
+                                                           FontFamily="{StaticResource MontserratMedium}"
+                                                           FontSizeFactor=".6"
+                                                           LineBreakMode="TailTruncation"
+                                                           NamedFontSize="Medium"
+                                                           Text="{Binding From, Converter={StaticResource StringSplitter}, ConverterParameter=0}"
+                                                           TextColor="{StaticResource TextColorCyclesGray}"
+                                                           VerticalOptions="CenterAndExpand" />
+                                        <views:CustomLabel Grid.Column="1"
+                                                           FontFamily="{StaticResource MontserratMedium}"
+                                                           FontSizeFactor=".6"
+                                                           LineBreakMode="TailTruncation"
+                                                           NamedFontSize="Medium"
+                                                           Text="{Binding To, Converter={StaticResource StringSplitter}, ConverterParameter=0, StringFormat=' to {0}'}"
+                                                           TextColor="{StaticResource TextColorCyclesGray}"
+                                                           VerticalOptions="CenterAndExpand" />
+                                        <views:CustomLabel Grid.Column="2"
+                                                           FontFamily="{StaticResource MontserratMedium}"
+                                                           FontSizeFactor=".4"
+                                                           HorizontalOptions="StartAndExpand"
+                                                           NamedFontSize="Medium"
+                                                           TextColor="{StaticResource ButtonBGColorCyclesRed}"
+                                                           VerticalOptions="CenterAndExpand">
+                                            <views:CustomLabel.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding TimeSpent}" />
+                                                    <Span Text="mins" />
+                                                </FormattedString>
+                                            </views:CustomLabel.FormattedText>
+                                        </views:CustomLabel>
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

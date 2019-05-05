@@ -6,24 +6,9 @@
     <color android:color="#FFF"/>
   </item>
 
-  <!--<item>
-    <bitmap android:gravity="center"
-           android:src="@drawable/splash_dark_rect"
-           android:tileMode="disabled"
-    />
-    
-  <scale xmlns:android="http://schemas.android.com/apk/res/android"
-          android:scaleGravity="center_vertical|center_horizontal"
-           android:drawable="@drawable/splash_dark_rect"
-           android:scaleHeight="70%"
-           android:scaleWidth="70%"
-    />
-  
-  </item>-->
-
   <item>
     <bitmap android:gravity="center"
-            android:src="@drawable/cycles_logo"
+            android:src="@drawable/splash_logo"
             android:tileMode="disabled"
     />
   </item>
@@ -37,11 +22,3 @@
   </item>-->
 
 </layer-list>
-<!--<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:drawable="@drawable/splash001" android:duration="100" />
-  <item android:drawable="@drawable/splash002" android:duration="100" />
-  --><!--<item android:drawable="@drawable/asteroid03" android:duration="100" />--><!--
-  --><!--<item android:drawable="@drawable/asteroid04" android:duration="100" />
-  <item android:drawable="@drawable/asteroid05" android:duration="100" />
-  <item android:drawable="@drawable/asteroid06" android:duration="100" />--><!--
-</animation-list>-->

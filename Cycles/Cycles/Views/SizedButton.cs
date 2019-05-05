@@ -100,16 +100,15 @@ namespace Cycles.Views
             ((SizedButton)bindable).OnFontSizeChangedImpl();
         }
 
-
         public virtual void OnFontSizeChangedImpl()
         {
             double density = (App.ScreenWidth + App.ScreenHeight) / 2;
-            density = density / 160;
+            density /= 160;
 
             density = ((density - 1) / 3) + 1;
             if (Device.Idiom == TargetIdiom.Tablet)
             {
-                density = density * 2;
+                density *= 2;
             }
             FontSize = FontSizeFactor * Device.GetNamedSize(NamedFontSize, typeof(Button)) * density;
             InvalidateMeasure();

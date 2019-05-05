@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+	android:paddingHorizontal="24dp">
+	<EditText
+		android:id="@+id/phoneNumber"
+		android:inputType="phone"
+		android:digits="0123456789+"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:hint="(234) 0815-524-2977"
+		android:lines="1"
+		android:maxLength="19"
+		android:fontFamily="@font/montserrat_light"
+		android:textColor="@color/cyclesBlack"
+		android:textSize="16sp"
+/> 
+</LinearLayout>

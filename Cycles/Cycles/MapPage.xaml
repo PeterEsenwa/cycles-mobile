@@ -30,7 +30,7 @@
                          Grid.ColumnSpan="2"
                          HasZoomEnabled="True"
                          HorizontalOptions="FillAndExpand"
-                         IsShowingUser="True"
+                         IsShowingUser="False"
                          IsVisible="False"
                          MapType="Street"
                          VerticalOptions="Fill" />

@@ -1,4 +1,5 @@
 ﻿using Android.Gms.Maps.Model;
+using Cycles.Droid.Utils;
 using Cycles.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -127,6 +128,7 @@ namespace Cycles.Utils
                 //var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
                 //var d = R * c;
                 //return d * 1000;
+                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
                 return null;
             }
 

@@ -3,7 +3,43 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-	 android:background="#F05123"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    android:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+    android:background="@color/colorPrimaryDark"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/cycles_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/cycles_text"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:fontFamily="@font/montserrat_medium"
+                android:layout_gravity="center"
+                android:gravity="center"
+	/>
 
+            <ImageButton
+                android:id="@+id/gift_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:cropToPadding="true"
+                android:background="@color/colorPrimaryDark"
+                android:padding="12dp"
+                android:src="@drawable/gift_image"
+                android:gravity="right"
+	/>
+        </LinearLayout>
+     
+    </LinearLayout>
+
+
+</android.support.v7.widget.Toolbar>

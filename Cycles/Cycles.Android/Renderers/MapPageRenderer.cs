@@ -2,7 +2,9 @@
 using Android.Gms.Common;
 using Android.Gms.Common.Apis;
 using Android.Gms.Location;
-using Android.Graphics.Drawables;
+using Android.Gms.Maps;
+using Android.Gms.Maps.Model;
+using Android.Graphics;
 using Android.Locations;
 using Android.OS;
 using Android.Support.Design.Widget;
@@ -12,250 +14,192 @@ using Android.Views;
 using Android.Widget;
 using Cycles.Droid.Renderers;
 using Cycles.Droid.Services;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using Xamarin.Forms.Maps.Android;
 using Xamarin.Forms.Platform.Android;
-using static Cycles.Droid.MainActivity;
-using AButton = Android.Widget.Button;
+
+using static Android.Support.Design.Widget.AppBarLayout.LayoutParams;
 using AView = Android.Views.View;
+using Button = Android.Widget.Button;
+using Color = Xamarin.Forms.Color;
+using ImageButton = Android.Widget.ImageButton;
 
 [assembly: ExportRenderer(typeof(Cycles.MapPage), typeof(MapPageRenderer))]
+
 namespace Cycles.Droid.Renderers
 {
     public class MapPageRenderer : PageRenderer, GoogleApiClient.IConnectionCallbacks,
         GoogleApiClient.IOnConnectionFailedListener, Android.Gms.Location.ILocationListener
     {
-        protected const string TAG = "location-settings";
-        protected const int REQUEST_CHECK_SETTINGS = 0x1;
+        private const string TAG = "location-settings";
+        protected const int RequestCheckSettings = 0x1;
 
-        private CoordinatorLayout _androidCoordinatorLayout;
-        private AppBarLayout _androidAppBarLayout;
-        private int bottomSheetHeight;
-        private LinearLayout _androidLinearLayout;
-        private AButton StartRideBtn;
-        private AButton FindClosestBike;
-        private ViewGroup viewGroup;
-        private MapRenderer mapView;
+        public static bool IsReload { get; set; }
+        private CoordinatorLayout AndroidCoordinatorLayout { get; set; }
+        //private AppBarLayout AndroidAppBarLayout { get; set; }
 
-        private TextView DistanceCalcTextView;
-        private float totatlDist;
-        private Location oldLocation;
+        private ViewGroup MainViewGroup { get; set; }
+        private float TotalDist { get; set; }
+        private Location OldLocation { get; set; }
 
-        private bool isStarted = false;
-        private Intent startServiceIntent;
+        private bool IsStarted { get; set; }
+        private readonly Intent startServiceIntent;
         private Intent stopServiceIntent;
-        private RideHandlerServiceConnection serviceConnection;
-        //LocationManager locationManager;
-        private int peekHeight;
-        private GoogleApiClient mGoogleApiClient;
+        private RideHandlerServiceConnection ServiceConnection { get; set; }
+
+        private GoogleApiClient mGoogleApiClient { get; set; }
+
         private LocationRequest mLocationRequest;
-        private LocationSettingsRequest mLocationSettingsRequest;
+        //private LocationSettingsRequest mLocationSettingsRequest;
 
-        public const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-        public const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+        FusedLocationProviderClient fusedLocationProviderClient;
 
 
-        //public void SendCustomClicked()
-        //{
-        //    EventHandler eventHandler = this.FoundClosestBike;
-        //    eventHandler?.Invoke((object)this, EventArgs.Empty);
-        //}
+        private static CyclesMapRenderer MyMapView { get; set; }
+        private const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+        private const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+        //private MapPage MapPage { get; set; }
+        public MainActivity mainActivity { get; private set; }
 
         public MapPageRenderer(Context context) : base(context)
         {
+            mainActivity = (Context as MainActivity);
+
+            //MessagingCenter.Subscribe<MainActivity>(this, "Close Scanner",
+            //    (sender) => { Application.Current.MainPage = MapPage; });
+            fusedLocationProviderClient = LocationServices.GetFusedLocationProviderClient(mainActivity);
+
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
-                AView decorView = window.DecorView;
-                decorView.SetFitsSystemWindows(false);
+                if (mainActivity?.Window != null)
+                {
+                    AView decorView = mainActivity.Window.DecorView;
+                    decorView.SetFitsSystemWindows(false);
 
-                var uiOptions = (int)decorView.SystemUiVisibility;
-                var newUiOptions = uiOptions;
-
-                //window.AddFlags(WindowManagerFlags.TranslucentStatus);
-                window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
-                //window.SetStatusBarColor(Color.FromHex("#99d7282f").ToAndroid());
-                newUiOptions |= (int)SystemUiFlags.LayoutFullscreen;
-                newUiOptions |= (int)SystemUiFlags.LightNavigationBar;
-                newUiOptions |= (int)SystemUiFlags.LayoutStable;
-
-                //decorView.SystemUiVisibility = (StatusBarVisibility)newUiOptions;
+                    mainActivity.Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
+                }
             }
-            //newUiOptions |= (int)SystemUiFlags.Immersive;
 
-
-            BuildGoogleApiClient();
-            CreateLocationRequest();
-            BuildLocationSettingsRequest();
+            //BuildGoogleApiClient();
 
             startServiceIntent = new Intent(Context, typeof(RideHandlerService));
             startServiceIntent.SetAction(Constants.ACTION_START_SERVICE);
             stopServiceIntent = new Intent(Context, typeof(RideHandlerService));
             stopServiceIntent.SetAction(Constants.ACTION_STOP_SERVICE);
 
-            Color findBikeColor = (Color)Application.Current.Resources["ButtonBGColorNormalRed"];
-            Color NearBlackTxtColor = (Color)Application.Current.Resources["TextColorNearBlack"];
-
             #region Initialize _androidCoordinatorLayout with LayoutParams
 
-            _androidCoordinatorLayout = new CoordinatorLayout(Context)
+            AndroidCoordinatorLayout = (CoordinatorLayout)LayoutInflater.FromContext(Context)
+                .Inflate(Resource.Layout.MapWithCoordinator, null);
+            AndroidCoordinatorLayout.SetBackgroundColor(Color.Transparent.ToAndroid());
+            var scanBarcode = AndroidCoordinatorLayout.FindViewById<Button>(Resource.Id.scan_barcode);
+
+            var closestBikeFab = AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_closest_bicycle);
+            var locateMeFab = AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_locate_me);
+            var refreshMapFab = AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_refresh_map);
+            if (closestBikeFab != null)
             {
-                LayoutParameters = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent)
-            };
-            _androidCoordinatorLayout.SetBackgroundColor(Color.Transparent.ToAndroid());
+                closestBikeFab.Click += FindClosestBike;
+            }
+
+            if (scanBarcode != null)
+            {
+                scanBarcode.Click += ScanBarcode_Click;
+            }
+
+            if (locateMeFab != null)
+            {
+                locateMeFab.Click += LocateMe;
+            }
+
+            if (refreshMapFab != null)
+            {
+                refreshMapFab.Click += RefreshMap;
+            }
 
             #endregion
 
             #region Initialize _androidAppBarLayout with LayoutParams
 
-            _androidAppBarLayout = new AppBarLayout(Context);
-            _androidCoordinatorLayout.SetBackgroundColor(Android.Graphics.Color.ParseColor("#FFFFFF"));
+            //AndroidAppBarLayout = AndroidCoordinatorLayout.FindViewById<AppBarLayout>(Resource.Id.mappage_appbar);
+            var toolbar = AndroidCoordinatorLayout.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.mappage_toolbar);
 
-            AppBarLayout.LayoutParams layoutParams1 = new AppBarLayout.LayoutParams(LayoutParams.MatchParent, (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics));
-            layoutParams1.ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagEnterAlways;
+            var giftButton = toolbar.FindViewById<ImageButton>(Resource.Id.gift_button);
+            giftButton.Click += GiftButton_Click;
 
-            Android.Support.V7.Widget.Toolbar toolbar = new Android.Support.V7.Widget.Toolbar(Context)
+            if (toolbar.LayoutParameters != null)
             {
-                LayoutParameters = layoutParams1
-            };
+                ((AppBarLayout.LayoutParams)toolbar.LayoutParameters).ScrollFlags = ScrollFlagEnterAlways;
+            }
 
-            //AppBarLayout.LayoutParams @params = (AppBarLayout.LayoutParams)toolbar.LayoutParameters;
-            //@params.ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagEnterAlways;
-            //toolbar.LayoutParameters = @params;
+            mainActivity?.SetSupportActionBar(toolbar);
+            ActionBar actionBar = mainActivity?.SupportActionBar;
 
-            Android.Support.V7.Widget.Toolbar.LayoutParams textviewLayoutParams = new Android.Support.V7.Widget.Toolbar.LayoutParams(LayoutParams.WrapContent, LayoutParams.WrapContent)
+            if (actionBar != null)
             {
-                Gravity = (int)GravityFlags.CenterHorizontal
-            };
-            TextView titleTextView = new TextView(Context)
-            {
-                Text = "Cycles",
-                LayoutParameters = textviewLayoutParams,
-                TextSize = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 10, base.Resources.DisplayMetrics)
-            };
-
-            titleTextView.SetTextColor(Android.Graphics.Color.White);
-
-            toolbar.AddView(titleTextView);
-            toolbar.SetBackgroundColor(Android.Graphics.Color.ParseColor("#AC2026"));
-            //toolbar.SetTitleTextColor(Android.Graphics.Color.ParseColor("#FFFFFF"));
-
-            activity.SetSupportActionBar(toolbar);
-
-
-            ActionBar actionBar = activity.SupportActionBar;
-
-            actionBar.SetDisplayHomeAsUpEnabled(true);
-            actionBar.SetDisplayShowTitleEnabled(false);
-
-            actionBar.SetHomeAsUpIndicator(Resource.Drawable.baseline_menu_white_24);
-            _androidAppBarLayout.AddView(toolbar);
-
-            #endregion
-            _androidAppBarLayout.LayoutParameters = new AppBarLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.WrapContent);
-            _androidAppBarLayout.Elevation = 9;
-            _androidCoordinatorLayout.AddView(_androidAppBarLayout);
-
-            #region Initialize _androidLinearLayout (for use as BottomSheet)
-
-            bottomSheetHeight = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 250, Resources.DisplayMetrics);
-            _androidLinearLayout = new LinearLayout(Context)
-            {
-                Orientation = Orientation.Vertical,
-                LayoutParameters = new LayoutParams(LayoutParams.MatchParent, bottomSheetHeight),
-                Elevation = 10
-            };
-
-            _androidLinearLayout.SetPadding(12, 0, 12, 0);
-            _androidLinearLayout.SetBackgroundResource(Resource.Drawable.coordinator_background);
+                actionBar.SetDisplayHomeAsUpEnabled(true);
+                actionBar.SetDisplayShowTitleEnabled(false);
+                actionBar.SetHomeAsUpIndicator(Resource.Drawable.baseline_menu_white_24);
+            }
 
             #endregion
 
-            #region Create (topContainer) : LinearLayout to hold top content of the BottomSheet
-
-            LinearLayout topContainer = new LinearLayout(Context)
-            {
-                Orientation = Orientation.Horizontal,
-                LayoutParameters = new LayoutParams(LayoutParams.MatchParent, (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 80, Resources.DisplayMetrics)),
-            };
-
-            topContainer.SetGravity(GravityFlags.Center);
-            topContainer.SetBackgroundColor(Color.Transparent.ToAndroid());
-
-            #endregion
-
-            #region Create (descriptionHolder) : LinearLayout to hold descriptive text about current location/area
-
-            LinearLayout descriptionHolder = new LinearLayout(Context) { Orientation = Orientation.Vertical };
-
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WrapContent, LayoutParams.WrapContent)
-            {
-                RightMargin = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 32, base.Resources.DisplayMetrics)
-            };
-            descriptionHolder.LayoutParameters = layoutParams;
-            descriptionHolder.SetBackgroundColor(Color.Transparent.ToAndroid());
-
-            #endregion
-
-            #region Create TextViews for area info
-
-            TextView communityTxt = new TextView(Context) { Text = "Community:", TextSize = 18, Gravity = GravityFlags.Top };
-            TextView placeTxt = new TextView(Context) { Text = "Covenant University" };
-
-            communityTxt.SetIncludeFontPadding(false);
-            communityTxt.SetTextColor(NearBlackTxtColor.ToAndroid());
-            placeTxt.SetTextColor(NearBlackTxtColor.ToAndroid());
-
-            #endregion
-
-            #region Initialize StartRideBtn
-
-            StartRideBtn = new AButton(Context)
-            {
-                Text = "Start Ride"
-            };
-
-            #endregion
-
-            #region Initialize FindClosestBike Btn
-
-            FindClosestBike = new AButton(Context)
-            {
-                Text = "Closest Bike",
-                Elevation = 8,
-                TextSize = 14,
-            };
-            Drawable leftIconClosestBike = Context.GetDrawable(Resource.Drawable.find_bike_white);
-            FindClosestBike.CompoundDrawablePadding = 8;
-            FindClosestBike.SetCompoundDrawablesWithIntrinsicBounds(leftIconClosestBike, null, null, null);
-            FindClosestBike.Background.SetColorFilter(findBikeColor.ToAndroid(), Android.Graphics.PorterDuff.Mode.Multiply);
-            FindClosestBike.SetTextColor(Android.Graphics.Color.White);
-
-            #endregion
-
-            DistanceCalcTextView = new TextView(Context) { Text = "Distance shows here" };
-
-            //activity.OnOptionsItemSelected = 
-
-            descriptionHolder.AddView(communityTxt);
-            descriptionHolder.AddView(placeTxt);
-
-            topContainer.AddView(descriptionHolder);
-            topContainer.AddView(FindClosestBike);
-            _androidLinearLayout.AddView(topContainer);
-            _androidLinearLayout.AddView(StartRideBtn);
-            _androidLinearLayout.AddView(DistanceCalcTextView);
-
-
-            //LinearLayout.AddView(StartRideBtn);
-            AddView(_androidCoordinatorLayout);
-
+            AddView(AndroidCoordinatorLayout);
         }
 
+        private void GiftButton_Click(object sender, EventArgs e)
+        {
+            PopupNavigation.Instance.PushAsync(new Views.GiftPopup(), true);
+        }
 
+        private void ScanBarcode_Click(object sender, EventArgs e)
+        {
+            MessagingCenter.Send(this, "Scanner Opened");
+            //var scanner = new ZXingScannerView();
+            //var scanPage = new ZXingScannerPage(new MobileBarcodeScanningOptions {AutoRotate = true});
+            //scanPage.OnScanResult += (result) =>
+            //{
+            //    scanPage.IsScanning = false;
 
-        protected void BuildGoogleApiClient()
+            //    Device.BeginInvokeOnMainThread(() =>
+            //    {
+            //        Application.Current.MainPage = App.rootPage;
+            //        //DisplayAlert("Scanned Barcode", result.Text, "OK");
+            //    });
+            //};
+            //Application.Current.MainPage = new NavigationPage(scanPage);
+        }
+
+        private void RefreshMap(object sender, EventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private async void LocateMe(object sender, EventArgs e)
+        {
+            Location location = await fusedLocationProviderClient.GetLastLocationAsync();
+            var latLng = new LatLng(location.Latitude, location.Longitude);
+            CameraPosition.Builder builder = CameraPosition.InvokeBuilder();
+            builder.Target(latLng);
+            builder.Zoom(18);
+            builder.Bearing(location.Bearing);
+
+            CameraPosition cameraPosition = builder.Build();
+
+            CameraUpdate cameraUpdate = CameraUpdateFactory.NewCameraPosition(cameraPosition);
+
+            MyMapView.nativeMap.AnimateCamera(cameraUpdate);
+        }
+
+        private void FindClosestBike(object sender, EventArgs e)
+        {
+            Toast.MakeText(Context, "You've found a bike?", ToastLength.Long).Show();
+        }
+
+        private void BuildGoogleApiClient()
         {
             Log.Info(TAG, "Building GoogleApiClient");
             mGoogleApiClient = new GoogleApiClient.Builder(Context)
@@ -265,28 +209,45 @@ namespace Cycles.Droid.Renderers
                 .Build();
         }
 
-        protected void CreateLocationRequest()
+        private async Task CreateLocationRequest()
         {
             mLocationRequest = new LocationRequest();
             mLocationRequest.SetInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
             mLocationRequest.SetFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
             mLocationRequest.SetPriority(LocationRequest.PriorityHighAccuracy);
+            var callback = new LocationCallback();
+            callback.LocationResult += OnLocationResult;
+            await fusedLocationProviderClient.RequestLocationUpdatesAsync(mLocationRequest, callback);
         }
 
-        protected void BuildLocationSettingsRequest()
+        private void OnLocationResult(object sender, LocationCallbackResultEventArgs e)
         {
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-            builder.AddLocationRequest(mLocationRequest);
-            mLocationSettingsRequest = builder.Build();
+            if (e.Result.Locations.Count >= 1)
+            {
+                OldLocation = e.Result.Locations[0];
+            }
         }
 
-        protected async Task StartLocationUpdates()
+        private bool IsGooglePlayServicesInstalled()
         {
-            await LocationServices.FusedLocationApi.RequestLocationUpdates(
-                mGoogleApiClient,
-                mLocationRequest,
-                this
-            );
+            var queryResult = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(Context);
+            if (queryResult == ConnectionResult.Success)
+            {
+                Log.Info("MainActivity", "Google Play Services is installed on this device.");
+                return true;
+            }
+
+            if (GoogleApiAvailability.Instance.IsUserResolvableError(queryResult))
+            {
+                // Check if there is a way the user can resolve the issue
+                var errorString = GoogleApiAvailability.Instance.GetErrorString(queryResult);
+                Log.Error("MainActivity", "There is a problem with Google Play Services on this device: {0} - {1}",
+                    queryResult, errorString);
+
+                // Alternately, display the error to the user.
+            }
+
+            return false;
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
@@ -295,95 +256,70 @@ namespace Cycles.Droid.Renderers
 
             if (e.OldElement != null || Element == null)
             {
-                if (Element == null)
-                {
-                    viewGroup = null;
-                    _androidLinearLayout = null;
-                    _androidCoordinatorLayout = null;
-                    _androidAppBarLayout = null;
-                }
+                if (Element != null) return;
+                MainViewGroup = null;
+                AndroidCoordinatorLayout = null;
+                //AndroidAppBarLayout = null;
 
                 return;
             }
 
-            StartRideBtn.Click += StartRideHandlerService;
-            FindClosestBike.Click += ((MapPage)Element).SizedButton_Clicked;
+            if (e.NewElement != null)
+            {
+                MessagingCenter.Send(this, "Remove Lockscreen");
+            }
         }
 
         private void StartRideHandlerService(object sender, EventArgs e)
         {
-
-            if (!isStarted)
+            if (!IsStarted)
             {
-                StartRideBtn.Text = "Stop Ride";
                 Context.StartService(startServiceIntent);
-                if (serviceConnection == null)
+                if (ServiceConnection == null)
                 {
-                    serviceConnection = new RideHandlerServiceConnection(this);
+                    ServiceConnection = new RideHandlerServiceConnection(this);
                 }
-                isStarted = true;
-                Intent serviceToStart = new Intent(Context, typeof(RideHandlerService));
-                Context.BindService(serviceToStart, serviceConnection, Bind.AutoCreate);
+
+                IsStarted = true;
+                var serviceToStart = new Intent(Context, typeof(RideHandlerService));
+                Context.BindService(serviceToStart, ServiceConnection, Bind.AutoCreate);
             }
             else
             {
-                oldLocation = null;
+                OldLocation = null;
                 //locationManager.RemoveUpdates(this);
-                isStarted = false;
-                Context.UnbindService(serviceConnection);
+                IsStarted = false;
+                Context.UnbindService(ServiceConnection);
                 Context.StopService(stopServiceIntent);
-                StartRideBtn.Text = "Start Ride";
             }
-
         }
 
-        private void InitView()
-        {
-            _androidCoordinatorLayout.AddView(_androidLinearLayout);
-            CoordinatorLayout.LayoutParams parameters = (CoordinatorLayout.LayoutParams)_androidLinearLayout.LayoutParameters;
-
-            peekHeight = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 80, Resources.DisplayMetrics);
-
-            BottomSheetBehavior bottomSheetBehavior = new BottomSheetBehavior
-            {
-                PeekHeight = 0,
-                Hideable = false,
-                State = BottomSheetBehavior.StateHidden
-            };
-
-            int appbarHeight = _androidCoordinatorLayout.Height - peekHeight;
-
-            parameters.Behavior = bottomSheetBehavior;
-            _androidLinearLayout.LayoutParameters = parameters;
-        }
-
-        public override void AddView(AView child)
+        public override async void AddView(AView child)
         {
             child.RemoveFromParent();
             base.AddView(child);
             if (!(child is CoordinatorLayout))
             {
                 child.RemoveFromParent();
-
-                CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
-                //layoutParams.ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagEnterAlways;
-
-                ((ViewGroup)child).LayoutParameters = layoutParams;
-                viewGroup = (ViewGroup)child;
-                for (int i = 0; i < viewGroup.ChildCount; i++)
+                ((ViewGroup)child).LayoutParameters =
+                    new CoordinatorLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
+                MainViewGroup = (ViewGroup)child;
+                AndroidCoordinatorLayout.FindViewById<Android.Widget.RelativeLayout>(Resource.Id.map_holder).AddView(child);
+                for (var i = 0; i < MainViewGroup.ChildCount; i++)
                 {
-                    AView foundChild = viewGroup.GetChildAt(i);
-                    if (foundChild is MapRenderer)
+                    AView foundChild = MainViewGroup.GetChildAt(i);
+                    if (foundChild is CyclesMapRenderer cyclesMapRenderer)
                     {
-                        mapView = (MapRenderer)foundChild;
+                        MyMapView = cyclesMapRenderer;
+                    }
+                    if (IsGooglePlayServicesInstalled())
+                    {
+                        //await CreateLocationRequest();
                     }
                 }
-                //AppBarLayout.LayoutParams @params = (AppBarLayout.LayoutParams)viewGroup.LayoutParameters;
-                //@params.ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagEnterAlways;
-                //viewGroup.LayoutParameters = @params;
 
-                _androidCoordinatorLayout.AddView(viewGroup);
-                InitView();
+                AndroidCoordinatorLayout.FindViewById(Resource.Id.fabs_holder).BringToFront();
+                AndroidCoordinatorLayout.FindViewById(Resource.Id.scan_barcode).BringToFront();
             }
         }
 
@@ -391,66 +327,45 @@ namespace Cycles.Droid.Renderers
         {
             base.OnLayout(changed, l, t, r, b);
 
-            if (_androidCoordinatorLayout != null)
+            if (AndroidCoordinatorLayout != null)
             {
                 var msw = MeasureSpec.MakeMeasureSpec(r - l, MeasureSpecMode.Exactly);
                 var msh = MeasureSpec.MakeMeasureSpec(b - t, MeasureSpecMode.Exactly);
 
-                _androidCoordinatorLayout.Measure(msw, msh);
-                _androidCoordinatorLayout.Layout(0, 0, r - l, b - t);
-
-                int CoordinatorHeightDiff = _androidCoordinatorLayout.Height - peekHeight;
-                if (_androidAppBarLayout.Parent == null)
-                {
-                    //_androidAppBarLayout.LayoutParameters = new AppBarLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
-                    //_androidCoordinatorLayout.AddView(_androidAppBarLayout);
-                }
-                //if (mapView.Height > CoordinatorHeightDiff || mapView.Height <= 0)
-                //{
-                //    mapView.LayoutParameters.Height = CoordinatorHeightDiff;
-                //    mapView.Layout(0, 0, r - l, CoordinatorHeightDiff - t);
-                //}
-
-                //viewGroup.Layout(0, 0, r - l, CoordinatorHeightDiff - t);
+                AndroidCoordinatorLayout?.Measure(msw, msh);
+                AndroidCoordinatorLayout?.Layout(0, 0, r - l, b - t);
             }
         }
 
         public void OnConnected(Bundle connectionHint)
         {
             Log.Info(TAG, "Connected to GoogleApiClient");
-            DistanceCalcTextView.Text = "Connected to GoogleApiClient";
         }
 
         public void OnConnectionSuspended(int cause)
         {
             Log.Info(TAG, "Connection suspended");
-            DistanceCalcTextView.Text = "Connect suspended";
         }
 
         public void OnConnectionFailed(ConnectionResult result)
         {
             Log.Info(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.ErrorCode);
-            DistanceCalcTextView.Text = "Connection failed: ConnectionResult.getErrorCode() = " + result.ErrorCode;
         }
 
         public void OnLocationChanged(Location location)
         {
-            if (oldLocation == null)
+            if (OldLocation == null)
             {
-                oldLocation = location;
-                DistanceCalcTextView.Text = "Distance shows here";
+                OldLocation = location;
             }
             else
             {
-                if (oldLocation.Accuracy < location.Accuracy)
+                if (OldLocation.Accuracy < location.Accuracy)
                 {
-                    totatlDist = totatlDist + oldLocation.DistanceTo(location);
-                    oldLocation = location;
-                    DistanceCalcTextView.Text = "Distance traveled: " + Math.Floor(totatlDist);
+                    TotalDist += OldLocation.DistanceTo(location);
+                    OldLocation = location;
                 }
             }
-
         }
     }
-
 }

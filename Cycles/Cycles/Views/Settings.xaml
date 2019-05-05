@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Cycles.Views"
+             x:Class="Cycles.Views.Settings">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical">
+            <StackLayout Orientation="Horizontal">
+                <views:CustomLabel Text="Community"
+                                   VerticalOptions="CenterAndExpand"
+                                   HorizontalOptions="CenterAndExpand" />
+                <Picker  />
+            </StackLayout>
+            <views:CustomLabel Text="Signup Method: Google Auth"
+                               VerticalOptions="CenterAndExpand"
+                               HorizontalOptions="CenterAndExpand" />
+            <views:CustomLabel Text="Community"
+                               VerticalOptions="CenterAndExpand"
+                               HorizontalOptions="CenterAndExpand" />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/ic_fitpage">
+    <target
+        android:name="fitdash"
+        android:animation="@animator/disappear" />
+    <target
+        android:name="fittext"
+        android:animation="@animator/disappear" />
+    <target
+        android:name="fastdash"
+        android:animation="@animator/appear" />
+    <target
+        android:name="fasttext"
+        android:animation="@animator/appear" />
+</animated-vector>

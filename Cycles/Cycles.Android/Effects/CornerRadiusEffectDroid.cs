@@ -9,7 +9,8 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-[assembly: ExportEffect(typeof(RoundedCornersEffectDroid), "RoundedCornersEffectDroid")]
+
+[assembly: ExportEffect(typeof(RoundedCornersEffectDroid), "RoundedCornersEffect")]
 namespace Cycles.Droid.Effects
 {
     internal class RoundedCornersEffectDroid : PlatformEffect
@@ -27,7 +28,7 @@ namespace Cycles.Droid.Effects
 
         protected override void OnElementPropertyChanged(PropertyChangedEventArgs args)
         {
-            if (args.PropertyName == RoundCorners.CornerRadiusProperty.PropertyName)
+            if (args.PropertyName == RoundCornersEffect.CornerRadiusProperty.PropertyName)
                 SetCornerRadius();
         }
 
@@ -46,7 +47,7 @@ namespace Cycles.Droid.Effects
 
         private void SetCornerRadius()
         {
-            var cornerRadius = RoundCorners.GetCornerRadius(Element) * GetDensity();
+            var cornerRadius = RoundCornersEffect.GetCornerRadius(Element) * GetDensity();
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
             {
                 Container.OutlineProvider = new RoundedOutlineProvider((float)cornerRadius);
@@ -59,8 +60,7 @@ namespace Cycles.Droid.Effects
 
         private static float GetDensity()
         {
-            var metrics = DeviceDisplay.ScreenMetrics;
-            return (float)metrics.Density;
+            return (float)DeviceDisplay.MainDisplayInfo.Density;
         }
 
         private class RoundedOutlineProvider : ViewOutlineProvider

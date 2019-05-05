@@ -4,5 +4,23 @@
   <string name="noti_chan_ride">Ride</string>
   <string name="welcome_text">Welcome to</string>
   <string name="cycles_text">Cycles</string>
-  
+  <string name="or_use">or use</string>
+  <string name="ok_text">OK</string>
+  <string name="email_text">email</string>
+  <string name="help_us_out">We\'ll try to do this automatically, but you could help us out</string>
+  <string name="verify_text">"Verify your number"</string>
+  <string name="i_have_an_account">already have an account?</string>
+  <string name="login_text">Go to Login</string>
+  <string name="send_code">Send Code</string>
+  <string name="fb_signup_error">Error with Facebook signup</string>
+  <string name="input_phone_number">Input your mobile number</string>
+  <string name="create_account">Create an account with</string>
+  <string name="finish_phone_verification">Verify</string>
+  <string name="facebook_app_id">2359375644284585</string>
+  <string name="close_dialog_btn">close dialog btn</string>
+  <string name="fb_login_protocol_scheme">fb2359375644284585</string>
+  <string name="locationPermissionLabel">Location Permissions</string>
+  <string name="locationPermissionDesc">Location permissions needed for this app to function properly</string>
+  <string name="com.crashlytics.android.build_id">cycles.v1.alpha</string>
+  <string name="connection_failed">Connection failed, please check your internet connection</string>
 </resources>

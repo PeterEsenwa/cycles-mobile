@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<popup:PopupPage xmlns:popup="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                 xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:views="clr-namespace:Cycles.Views"
+                 xmlns:utils="clr-namespace:Cycles.Utils"
+                 x:Class="Cycles.Views.GiftPopup">
+    <Grid VerticalOptions="CenterAndExpand"
+          HorizontalOptions="CenterAndExpand"
+          BackgroundColor="White"
+          Margin="{utils:ResponsiveThickness Right=4,Left=4}"
+          utils:RoundCornersEffect.CornerRadius="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height=".4*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="16" />
+        </Grid.ColumnDefinitions>
+        <Image Source="send_a_gift_bg"
+               Grid.Row="0"
+               Grid.RowSpan="3"
+               Grid.Column="0"
+               Grid.ColumnSpan="3"
+               VerticalOptions="FillAndExpand"
+               HorizontalOptions="FillAndExpand"
+               Aspect="AspectFill"/>
+        <views:CustomLabel Text="Send a free Ride!"
+                           FontFamily="{StaticResource MontserratMedium}"
+                           FontSizeFactor="1.2"
+                           TextColor="White"
+                           Grid.Column="1"
+                           Grid.Row="0"
+                           VerticalOptions="End"
+                           VerticalTextAlignment="Center"
+                           HorizontalOptions="Start"
+                           NamedFontSize="Medium" />
+        <views:PaddingBorderEntry BackgroundColor="White"
+                                  FontFamily="{StaticResource MontserratRegular}"
+                                  FontSizeFactor="1"
+                                  NamedFontSize="Small"
+                                  Grid.Column="1"
+                                  Grid.Row="1"
+                                  utils:RoundCornersEffect.CornerRadius="4"
+                                  Placeholder="Username of recipient" />
+    </Grid>
+</popup:PopupPage>

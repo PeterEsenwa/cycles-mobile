@@ -13,15 +13,14 @@
     <!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
     <item name="windowNoTitle">true</item>
     <!--We will be using the toolbar so no need to show ActionBar-->
-    <item name="windowActionBar">false</item>
     <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
     <!-- colorPrimary is used for the default action bar background -->
-    <item name="colorPrimary">#AC2026</item>
+    <item name="colorPrimary">@color/colorPrimary</item>
     <!-- colorPrimaryDark is used for the status bar -->
-    <item name="colorPrimaryDark">#AC2026</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
     <!-- colorAccent is used as the default value for colorControlActivated
              which is used to tint widgets -->
-    <item name="colorAccent">#262626</item>
+    <item name="colorAccent">@color/colorAccent</item>
     <!-- You can also set colorControlNormal, colorControlActivated
              colorControlHighlight and colorSwitchThumbNormal. -->
     <item name="windowActionModeOverlay">true</item>
@@ -30,18 +29,26 @@
     <item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
   </style>
 
+  <style name="Onboards" parent="Splash">
+    <item name="android:windowBackground">@color/launcher_background</item>
 
+  </style>
+  <style name="Login.TextInputLayout"
+         parent="@android:style/TextAppearance">
+    <item name="android:textColor">#E46F74</item>
+  </style>
   <style name="Splash" parent="Theme.AppCompat.Light.NoActionBar">
     <item name="android:windowBackground">@drawable/splash_screen</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
-    <item name="android:colorActivatedHighlight">#E46F74</item>
+    <!--<item name="android:colorControlActivated">#E46F74</item>-->
 
     <item name="colorPrimary">#FFFFFF</item>
 
-    <item name="colorPrimaryDark">#BA1437</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 
-    <item name="colorAccent">#262626</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    
     <item name="android:statusBarColor">#FFFFFF</item>
 
     <item name="android:windowLightStatusBar">true</item>
@@ -51,8 +58,43 @@
     <item name="android:windowLightNavigationBar">true</item>
   </style>
 
+  <style name="PhoneVerificationDialogStyle" parent="Theme.AppCompat.Dialog">
+    <item name="android:windowNoTitle">true</item>
+    <item name="colorPrimaryDark">@color/colorWhite</item>
+    <item name="colorPrimary">@color/colorWhite</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    <item name="android:colorControlNormal">@color/colorMiddleGray</item>
 
+    <!--<item name="titleTextColor">@android:color/colorAccent</item>-->
+    <!--<item name="subtitleTextColor">@android:color/colorAccent</item>-->
+    
+    <item name="android:statusBarColor">#FFFFFF</item>
+    
+    <item name="android:windowLightStatusBar">true</item>
+
+    <item name="android:navigationBarColor">#FFFFFF</item>
+
+    <item name="android:windowLightNavigationBar">true</item>
+    <!-- Set this to true if you want Full Screen without status bar -->
+    <item name="android:windowFullscreen">false</item>
+
+    <item name="android:windowIsFloating">false</item>
+
+    <!-- This is important! Don't forget to set window background -->
+    <item name="android:windowBackground">@color/colorWhite</item>
+
+    <!-- Additionally if you want animations when dialog opening -->
+    <!--<item name="android:windowEnterAnimation">@anim/slide_up</item>
+    <item name="android:windowExitAnimation">@anim/slide_down</item>-->
+  </style>
+  
   <style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
-    <item name="colorAccent">#FF4081</item>
+    <item name="colorAccent">@color/colorAccent</item>
+  </style>
+
+  <style name="MapSearchView"
+         parent="Widget.AppCompat.Light.SearchView">
+    <item name="layout">@layout/map_search_view</item>
+    <item name="commitIcon">@drawable/abc_ic_commit_search_api_mtrl_alpha</item>
   </style>
 </resources>

@@ -6,6 +6,7 @@
   </style>
   <!-- Base theme applied no matter what API -->
   <style name="MainTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:windowBackground">@color/colorWhite</item>
     <item name="android:windowNoTitle">true</item>
     <!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
     <item name="windowNoTitle">true</item>
@@ -26,23 +27,51 @@
 
     <item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
   </style>
+  
+  <style name="Onboards" parent="Splash">
+    <item name="android:windowBackground">@color/launcher_background</item>
 
+  </style>
 
   <style name="Splash" parent="Theme.AppCompat.Light.NoActionBar">
-    <item name="android:background">@drawable/splash_screen</item>
+    <item name="android:windowBackground">@drawable/splash_screen</item>
     <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">true</item>
+    <item name="android:windowFullscreen">false</item>
     <item name="android:colorActivatedHighlight">#E46F74</item>
 
     <item name="colorPrimary">#FFFFFF</item>
 
-    <item name="colorPrimaryDark">#BA1437</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 
-    <item name="colorAccent">#262626</item>
+    <item name="colorAccent">@color/colorAccent</item>
   </style>
 
 
+  <style name="PhoneVerificationDialogStyle" parent="Theme.AppCompat.Dialog">
+    <item name="android:windowNoTitle">true</item>
+    <item name="colorPrimaryDark">@color/colorWhite</item>
+    <item name="colorPrimary">@color/colorWhite</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    <item name="android:colorControlNormal">@color/colorMiddleGray</item>
+
+
+    <!-- Set this to true if you want Full Screen without status bar -->
+    <item name="android:windowFullscreen">false</item>
+
+    <item name="android:windowIsFloating">false</item>
+
+    <!-- This is important! Don't forget to set window background -->
+    <item name="android:windowBackground">@color/colorWhite</item>
+
+    <!-- Additionally if you want animations when dialog opening -->
+    <!--<item name="android:windowEnterAnimation">@anim/slide_up</item>
+    <item name="android:windowExitAnimation">@anim/slide_down</item>-->
+  </style>
+  
   <style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
-    <item name="colorAccent">#FF4081</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    <item name="colorPrimaryDark">@color/colorWhite</item>
+    <item name="colorPrimary">@color/colorWhite</item>
+
   </style>
 </resources>

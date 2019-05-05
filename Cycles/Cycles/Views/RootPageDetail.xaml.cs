@@ -15,6 +15,8 @@ namespace Cycles.Views
         public RootPageDetail()
         {
             InitializeComponent();
+            NavigationPage.SetHasNavigationBar(this, false);
+            labelToShow.Text = Title + " is coming soon";
         }
     }
 }

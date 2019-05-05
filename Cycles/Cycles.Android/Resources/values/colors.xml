@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="launcher_background">#FFFFFF</color>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="cyclesBlack">#222222</color>
+  <color name="launcher_background">#FFFFFF</color>
+  <color name="colorWhite">#FFFFFF</color>
+  <color name="colorHalfWhite">#95FFFFFF</color>
+  <color name="dirty_white">#EBEBEB</color>
+  <color name="colorMiddleGray">#7B7B7B</color>
+  <color name="colorPrimary">#D7282F</color>
+  <color name="colorPrimaryDark">#BD151B</color>
+  <color name="colorAccent">#262626</color>
+  <color name="colorError">#FFC107</color>
+  <color name="cyclesBlack">#262626</color>
+  <color name="cyclesBlackRipple">#BFBFBF</color>
+  <color name="cyclesRed">#D7282F</color>
+  <color name="design_snackbar_background_color">@color/cyclesBlack</color>
+  <color name="cyclesBlue">#0082cb</color>
+  <color name="cyclesBlueLight">#0093e6</color>
+  <color name="colorButtonNormal">#DB3E44</color>
 </resources>

@@ -15,18 +15,19 @@ using Cycles.Utils;
 using Android.Util;
 
 [assembly: ExportRenderer(typeof(CyclesMap), typeof(CyclesMapRenderer))]
+
 namespace Cycles.Droid.Renderers
 {
-    internal class CyclesMapRenderer : MapRenderer, GoogleMap.IInfoWindowAdapter
+    public class CyclesMapRenderer : MapRenderer, GoogleMap.IInfoWindowAdapter
     {
         List<CustomPin> customPins;
         public List<LatLng> lines;
+        public GoogleMap nativeMap;
 
         public List<Position> routeCoordinates { get; private set; }
 
         public CyclesMapRenderer(Context context) : base(context)
         {
-
         }
 
         protected override void OnElementChanged(Xamarin.Forms.Platform.Android.ElementChangedEventArgs<Map> e)
@@ -40,9 +41,10 @@ namespace Cycles.Droid.Renderers
 
             if (e.NewElement != null)
             {
-                CyclesMap formsMap = (CyclesMap)e.NewElement;
+                CyclesMap formsMap = (CyclesMap) e.NewElement;
                 routeCoordinates = formsMap.RouteCoordinates;
                 lines = formsMap.Lines;
+                formsMap.IsShowingUser = false;
                 formsMap.RoutesListUpdated += FormsMap_RoutesListUpdated;
                 customPins = formsMap.CustomPins;
                 Control.GetMapAsync(this);
@@ -59,10 +61,9 @@ namespace Cycles.Droid.Renderers
         {
             if (NativeMap != null)
             {
-
                 var polylineOptions = new PolylineOptions()
-                                .InvokeColor(0x66FF0000)
-                                .InvokeWidth(6);
+                    .InvokeColor(0x66FF0000)
+                    .InvokeWidth(6);
 
                 foreach (LatLng line in lines)
                 {
@@ -86,28 +87,34 @@ namespace Cycles.Droid.Renderers
 
         protected override void OnMapReady(GoogleMap map)
         {
-            int bottom = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
-            int left = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
-            int right = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
-            int top = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
+            var bottom = (int) TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
+            var left = (int) TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
+            var right = (int) TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, Resources.DisplayMetrics);
+            var top = (int) TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
+            
             map.SetPadding(left, top, right, bottom);
             map.SetMapStyle(MapStyleOptions.LoadRawResourceStyle(Context, Resource.Raw.my_map_customization));
-            base.OnMapReady(map);
-            
-            NativeMap.InfoWindowClick += OnInfoWindowClick;
-            NativeMap.SetInfoWindowAdapter(this);
-        }
+            map.MyLocationEnabled = false;
+            map.UiSettings.ZoomControlsEnabled = false;
+            map.UiSettings.MyLocationButtonEnabled = false;
+            map.InfoWindowClick += OnInfoWindowClick;
+            map.SetInfoWindowAdapter(this);
 
+            base.OnMapReady(map);
+            nativeMap = NativeMap;
+        }
+        
         protected override MarkerOptions CreateMarker(Pin pin)
         {
             var marker = new MarkerOptions();
             marker.SetPosition(new LatLng(pin.Position.Latitude, pin.Position.Longitude));
             marker.SetTitle(pin.Label);
             marker.SetSnippet(pin.Address);
-            if (((CustomPin)pin).PinType == CustomPin.CustomType.Park)
+            if (((CustomPin) pin).PinType == CustomPin.CustomType.Park)
             {
                 marker.SetIcon(BitmapDescriptorFactory.FromResource(Resource.Drawable.bike_park));
             }
+
             return marker;
         }
 
@@ -127,9 +134,11 @@ namespace Cycles.Droid.Renderers
             //    Android.App.Application.Context.StartActivity(intent);
             //}
         }
+
         public Android.Views.View GetInfoContents(Marker marker)
         {
-            if (Android.App.Application.Context.GetSystemService(Context.LayoutInflaterService) is LayoutInflater inflater)
+            if (Android.App.Application.Context.GetSystemService(Context.LayoutInflaterService) is LayoutInflater
+                inflater)
             {
                 //Android.Views.View view = new Android.Views.View(this);
 
@@ -162,6 +171,7 @@ namespace Cycles.Droid.Renderers
 
                 //return view;
             }
+
             return null;
         }
 
@@ -180,6 +190,7 @@ namespace Cycles.Droid.Renderers
                     return pin;
                 }
             }
+
             return null;
         }
     }

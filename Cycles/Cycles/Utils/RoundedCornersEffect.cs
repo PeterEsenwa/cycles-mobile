@@ -3,18 +3,17 @@ using Xamarin.Forms;
 
 namespace Cycles.Utils
 {
-    public static class RoundCorners
+    public class RoundCornersEffect : RoutingEffect
     {
-        public class RoundCornersEffect : RoutingEffect
+        public RoundCornersEffect() : base("Custom.RoundedCornersEffect")
         {
-            public RoundCornersEffect() : base("Custom.RoundedCornersEffectDroid")
-            {
-            }
-
-
         }
         public static readonly BindableProperty CornerRadiusProperty =
-   BindableProperty.CreateAttached("CornerRadius", typeof(double), typeof(RoundCorners), 0.0, propertyChanged: OnCornerRadiusChanged);
+         BindableProperty.CreateAttached("CornerRadius",
+             typeof(double),
+             typeof(RoundCornersEffect),
+             4.0,
+             propertyChanged: OnCornerRadiusChanged);
 
         //public static BindableProperty CornerRadiusProperty { get; set; } = BindableProperty.CreateAttached(
         //  "CornerRadius",
@@ -43,6 +42,7 @@ namespace Cycles.Utils
             if (cornerRadius == 0 && effect != null)
                 view.Effects.Remove(effect);
         }
+
     }
 
 }
