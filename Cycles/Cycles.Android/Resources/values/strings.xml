@@ -23,4 +23,6 @@
   <string name="locationPermissionDesc">Location permissions needed for this app to function properly</string>
   <string name="com.crashlytics.android.build_id">cycles.v1.alpha</string>
   <string name="connection_failed">Connection failed, please check your internet connection</string>
+  <string name="cycles_black_logo">cycles_black_logo</string>
+  <string name="go">GO</string>
 </resources>

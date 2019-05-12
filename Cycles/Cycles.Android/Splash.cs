@@ -35,12 +35,17 @@ using Xamarin.Facebook.Login.Widget;
 
 using static Cycles.Droid.Utils.SplashAnimationHelper;
 using static Android.Gms.Common.Apis.GoogleApiClient;
+using Firebase.DynamicLinks;
+using Android.Gms.Tasks;
+using Firebase.Analytics;
 
 namespace Cycles.Droid
 {
 
-    [Activity(Label = "Cycles", Icon = "@mipmap/icon", Theme = "@style/Splash", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public partial class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback
+    [Activity(Label = "Cycles", Icon = "@mipmap/icon", Theme = "@style/Splash",
+        MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+
+    public partial class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback, IOnSuccessListener
     {
         #region CONSTANTS
 
@@ -72,11 +77,11 @@ namespace Cycles.Droid
 
         private int CurrentPosition { get; set; } = 1;
         private ICallbackManager CallbackManager { get; set; }
-
+        
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            ISharedPreferences sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
+            ISharedPreferences sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
 
             Xamarin.Forms.Forms.SetFlags("Visual_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
@@ -94,9 +99,15 @@ namespace Cycles.Droid
 
             App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext, options);
             FirebaseAuth = FirebaseAuth.GetInstance(App);
+            FirebaseAnalytics.GetInstance(this);
+            //FirebaseDynamicLinks.Instance.GetDynamicLink(Intent).AddOnSuccessListener(this);
 
             bool firstRun = sharedPreferences.Contains(first_run);
-            bool firstRunValue = sharedPreferences.GetBoolean(first_run, true);
+            //bool firstRunValue = sharedPreferences.GetBoolean(first_run, true);
+            //if (data != null)
+            //{
+            //    SplashInit(sharedPreferences);
+            //}
             if (FirebaseAuth.CurrentUser != null && firstRun)
             {
                 StartActivity(new Intent(this, typeof(MainActivity)));
@@ -104,29 +115,7 @@ namespace Cycles.Droid
             }
             else if (!firstRun)
             {
-                SetContentView(Resource.Layout.Splash);
-                sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
-                NextButton = FindViewById<ImageButton>(Resource.Id.next_button);
-                SkipButton = FindViewById<Button>(Resource.Id.skip_button);
-                SkipButton.Click += SkipToEnd; ;
-                NextButton.Click += NextButton_Click;
-
-                FindViewById<TextView>(Resource.Id.goto_login).Click += Goto_LoginPage;
-                ConstraintLayout pagesHolder = FindViewById<ConstraintLayout>(Resource.Id.pages_holder);
-                PagesGestureListener gestureListener = new PagesGestureListener(this);
-                GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this, gestureListener);
-
-                pagesHolder.SetOnTouchListener(new PagesGestureRecognizer(gestureDetector));
-                FindViewById<ImageView>(Resource.Id.number_signup).Click += PhoneImageViewBtn_Click;
-                FindViewById<ImageView>(Resource.Id.google_signup).Click += GoogleSignup_Click;
-                FindViewById<ImageView>(Resource.Id.facebook_signup).Click += FacebookSignup_Click;
-                SplashBaseLayout = FindViewById<RelativeLayout>(Resource.Id.base_layout);
-
-                IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
-                indicators.Number_of_Indicators = 3;
-
-                FastFitPath = FindViewById<ImageView>(Resource.Id.fast_fit_path_imageview);
-                FastFitInitialDrawable = FastFitPath.Drawable;
+                SplashInit(sharedPreferences);
             }
             else if (firstRun)
             {
@@ -134,6 +123,34 @@ namespace Cycles.Droid
                 StartActivity(new Intent(this, typeof(LoginActivity)));
                 Finish();
             }
+        }
+
+        private void SplashInit(ISharedPreferences sharedPreferences)
+        {
+            SetContentView(Resource.Layout.Splash);
+            sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
+            NextButton = FindViewById<ImageButton>(Resource.Id.next_button);
+            SkipButton = FindViewById<Button>(Resource.Id.skip_button);
+            SkipButton.Click += SkipToEnd; ;
+            NextButton.Click += NextButton_Click;
+
+            FindViewById<TextView>(Resource.Id.goto_login).Click += Goto_LoginPage;
+            ConstraintLayout pagesHolder = FindViewById<ConstraintLayout>(Resource.Id.pages_holder);
+            PagesGestureListener gestureListener = new PagesGestureListener(this);
+            GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this, gestureListener);
+
+            pagesHolder.SetOnTouchListener(new PagesGestureRecognizer(gestureDetector));
+            FindViewById<ImageView>(Resource.Id.number_signup).Click += PhoneImageViewBtn_Click;
+            FindViewById<ImageView>(Resource.Id.google_signup).Click += GoogleSignup_Click;
+            FindViewById<ImageView>(Resource.Id.facebook_signup).Click += FacebookSignup_Click;
+            FindViewById<ImageView>(Resource.Id.email_signup).Click += EmailLayout_Click;
+            SplashBaseLayout = FindViewById<RelativeLayout>(Resource.Id.base_layout);
+
+            IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
+            indicators.Number_of_Indicators = 3;
+
+            FastFitPath = FindViewById<ImageView>(Resource.Id.fast_fit_path_imageview);
+            FastFitInitialDrawable = FastFitPath.Drawable;
         }
 
         #region Click Handlers
@@ -211,13 +228,14 @@ namespace Cycles.Droid
 
         private void EmailLayout_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            EmailSignUpFragment emailSignUp = new EmailSignUpFragment();
+            emailSignUp.Show(SupportFragmentManager, "Email_Sign_Up_Dialog");
         }
 
         private void NextButton_Click(object sender, EventArgs e)
         {
             DoSplashSwipe(SwipeDirection.Forward);
-        } 
+        }
         #endregion
 
         #region Phone number Verification Callbacks
@@ -410,6 +428,8 @@ namespace Cycles.Droid
 
         public async void OnSuccess(Java.Lang.Object result)
         {
+            _ = Log.Debug(Class.ToString(), result.Class.ToString());
+
             var success = await FirebaseAuthHelper.FirebaseAuthWithFacebook(FirebaseAuth, ((LoginResult)result).AccessToken);
             if (success)
             {

@@ -34,9 +34,10 @@ using System.Threading.Tasks;
 namespace Cycles.Droid
 {
     [Activity(Label = "Cycles", Theme = "@style/MainTheme",
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ShowWhenLocked = true)]
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        //, ShowWhenLocked = true
         AlertDialog.Builder AlertDialog { get; set; }
         private const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
         private static readonly SparseIntArray ORIENTATIONS = new SparseIntArray(4);
