@@ -3,11 +3,12 @@
        android:insetTop="6dp"
        android:insetRight="4dp"
        android:insetBottom="6dp">
-    <shape android:shape="rectangle"
-           android:tint="@color/transparent">
-        <padding android:left="8dp"
-                 android:top="4dp"
-                 android:right="8dp"
-                 android:bottom="4dp" />
-    </shape>
+  <shape android:shape="rectangle"
+         android:tint="@color/transparent">
+    <corners android:radius="@dimen/mtrl_btn_corner_radius" />
+    <padding android:left="8dp"
+             android:top="4dp"
+             android:right="8dp"
+             android:bottom="4dp" />
+  </shape>
 </inset>
