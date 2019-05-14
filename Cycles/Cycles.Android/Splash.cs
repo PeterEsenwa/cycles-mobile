@@ -78,18 +78,16 @@ namespace Cycles.Droid
 
         private int CurrentPosition { get; set; } = 1;
         private ICallbackManager CallbackManager { get; set; }
-        
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+
+            SetContentView(Resource.Layout.Splash);
             ISharedPreferences sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
 
-            Xamarin.Forms.Forms.SetFlags("Visual_Experimental");
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
-
-            XF.Material.Droid.Material.Init(this, savedInstanceState);
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            Xamarin.Forms.FormsMaterial.Init(this, savedInstanceState);
+            //XF.Material.Droid.Material.Init(this, savedInstanceState);
+            //Xamarin.Forms.FormsMaterial.Init(this, savedInstanceState);
 
             Crashlytics.Crashlytics.HandleManagedExceptions();
 
@@ -107,14 +105,21 @@ namespace Cycles.Droid
 
             bool firstRun = sharedPreferences.Contains(first_run);
 
-            if (FirebaseAuth.CurrentUser != null && firstRun)
+            if (Intent.HasExtra("intent_activity") && Intent.GetStringExtra("intent_activity").Equals("LoginActivity"))
+            {
+                SplashInit();
+                DoSplashSwipe(SwipeDirection.Forward);
+                DoSplashSwipe(SwipeDirection.Forward);
+            }
+            else if (FirebaseAuth.CurrentUser != null && firstRun)
             {
                 StartActivity(new Intent(this, typeof(MainActivity)));
                 Finish();
             }
             else if (!firstRun)
             {
-                SplashInit(sharedPreferences);
+                sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
+                SplashInit();
             }
             else if (firstRun)
             {
@@ -122,10 +127,8 @@ namespace Cycles.Droid
             }
         }
 
-        private void SplashInit(ISharedPreferences sharedPreferences)
+        private void SplashInit()
         {
-            SetContentView(Resource.Layout.Splash);
-            sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
             NextButton = FindViewById<ImageButton>(Resource.Id.next_button);
             SkipButton = FindViewById<Button>(Resource.Id.skip_button);
             SkipButton.Click += SkipToEnd; ;

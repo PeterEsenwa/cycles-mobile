@@ -83,7 +83,9 @@ namespace Cycles.Droid
 
         private void GotoSignUp(object sender, EventArgs e)
         {
-            StartActivity(new Intent(this, typeof(Splash)));
+            Intent splashIntent = new Intent(this, typeof(Splash));
+            splashIntent.PutExtra("intent_activity", "LoginActivity");
+            base.StartActivity(splashIntent);
             Finish();
         }
 
