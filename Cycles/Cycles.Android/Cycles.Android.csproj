@@ -20,8 +20,8 @@
     <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidClientHandler</AndroidHttpClientHandlerType>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AndroidKeyStore>false</AndroidKeyStore>
-    <AndroidSigningKeyStore>C:\Users\Dell Inspiron 15\AppData\Local\Xamarin\Mono for Android\Keystore\cycles_debug\cycles_debug.keystore</AndroidSigningKeyStore>
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>C:\Users\Dell Inspiron 15\AppData\Local\Xamarin\Mono for Android\debug.keystore</AndroidSigningKeyStore>
     <AndroidSigningStorePass>android</AndroidSigningStorePass>
     <AndroidSigningKeyPass>android</AndroidSigningKeyPass>
     <AndroidSigningKeyAlias>androiddebugkey</AndroidSigningKeyAlias>
@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis">
-      <Version>1.39.0</Version>
+      <Version>1.40.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter">
       <Version>1.9.0</Version>
@@ -138,25 +138,34 @@
       <Version>4.40.0</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Analytics">
-      <Version>71.1502.0-preview2</Version>
+      <Version>71.1630.0-preview4</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Auth">
       <Version>71.1510.0-preview1</Version>
     </PackageReference>
+    <PackageReference Include="Xamarin.Firebase.Dynamic.Links">
+      <Version>71.1615.0-preview4</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Firebase.Messaging">
+      <Version>71.1733.0-preview3</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Firebase.ML.Vision">
       <Version>71.1500.0-preview2</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms" Version="3.6.0.344457" />
+    <PackageReference Include="Xamarin.Firebase.Perf">
+      <Version>71.1620.0-preview4</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Forms" Version="4.0.0.394984-pre10" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Android.Support.v4" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Forms.Maps">
-      <Version>3.6.0.344457</Version>
+      <Version>4.0.0.394984-pre10</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms.Visual.Material">
-      <Version>4.0.0.346134-pre9</Version>
+      <Version>4.0.0.394984-pre10</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.GooglePlayServices.Auth">
       <Version>71.1600.0-preview1</Version>
@@ -190,6 +199,8 @@
     <Compile Include="Effects\CornerRadiusEffectDroid.cs" />
     <Compile Include="Effects\ShadowEffectDroid.cs" />
     <Compile Include="Effects\ToolbarEffectDroid.cs" />
+    <Compile Include="EmailSignUpFragment.cs" />
+    <Compile Include="Utils\EmailTextWatcher.cs" />
     <Compile Include="Utils\EnumExtension.cs" />
     <Compile Include="LoginActivity.cs" />
     <Compile Include="MainActivity.cs" />
@@ -265,7 +276,7 @@
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
     <AndroidResource Include="Resources\drawable-hdpi\cycles_logo.png" />
-    <AndroidResource Include="Resources\layout\MapWithCoordinator.axml">
+    <AndroidResource Include="Resources\layout-v21\MapWithCoordinator.axml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
@@ -277,10 +288,14 @@
     <AndroidResource Include="Resources\font\montserrat_medium_italic.ttf" />
     <AndroidResource Include="Resources\font\montserrat_regular.ttf" />
     <AndroidResource Include="Resources\font\montserrat_semi_bold.ttf" />
+    <AndroidResource Include="Resources\font\roboto_thin.ttf" />
+    <AndroidResource Include="Resources\font\roboto_medium.ttf" />
+    <AndroidResource Include="Resources\font\roboto_italic.ttf" />
+    <AndroidResource Include="Resources\font\roboto.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\Tabbar.axml" />
-    <AndroidResource Include="Resources\layout\Toolbar.axml" />
+    <AndroidResource Include="Resources\layout-v21\Tabbar.axml" />
+    <AndroidResource Include="Resources\layout-v21\Toolbar.axml" />
     <AndroidResource Include="Resources\values\styles.xml" />
     <AndroidResource Include="Resources\values\colors.xml" />
     <AndroidResource Include="Resources\mipmap-anydpi-v26\icon.xml" />
@@ -427,14 +442,19 @@
     <AndroidResource Include="Resources\drawable-xxxhdpi\splash_dark_rect.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\Splash.axml">
+    <AndroidResource Include="Resources\layout-v21\Splash.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\splash001.axml">
+    <AndroidResource Include="Resources\color\primary_text_red.xml" />
+    <AndroidResource Include="Resources\color\edittext_red_border.xml" />
+    <AndroidResource Include="Resources\drawable\edittext_rounded_red_border.xml" />
+    <AndroidResource Include="Resources\drawable\rounded_bg.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
+    <AndroidResource Include="Resources\values\dimens.xml" />
+    <AndroidResource Include="Resources\font-v26\montserrat.xml" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\splash002.axml">
@@ -523,7 +543,7 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\OnboardScreen.axml">
+    <AndroidResource Include="Resources\layout-v21\OnboardScreen.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -675,12 +695,12 @@
     <AndroidResource Include="Resources\drawable-hdpi\telephone.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\PhoneNumberDialog.axml">
+    <AndroidResource Include="Resources\layout-v21\PhoneNumberDialog.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\PhoneVerification.axml">
+    <AndroidResource Include="Resources\layout-v21\PhoneVerification.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -785,7 +805,7 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\map_search_view.axml">
+    <AndroidResource Include="Resources\layout-v21\map_search_view.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -987,7 +1007,7 @@
     <AndroidResource Include="Resources\drawable-hdpi\login_button_bg.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\Login.axml">
+    <AndroidResource Include="Resources\layout-v21\Login.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -1022,7 +1042,7 @@
     <AndroidResource Include="Resources\drawable-mdpi\back_arrow_red.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\BarcodeTracker.axml">
+    <AndroidResource Include="Resources\layout-v21\BarcodeTracker.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -1126,7 +1146,7 @@
     <AndroidResource Include="Resources\drawable-xxxhdpi\settings_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\TermsAndPrivacy.axml">
+    <AndroidResource Include="Resources\layout-v21\TermsAndPrivacy.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -1233,6 +1253,29 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-mdpi\baseline_menu_white_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\login_bg.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout-v26\Login.axml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout-v21\EmailSignupLayout.axml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\cycles_btn_default_material.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\cycles_btn_default_shape_mtrl.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\color\red_btn_tint.xml" />
   </ItemGroup>
   <Import Project="..\Cycles\Cycles.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

@@ -35,12 +35,18 @@ using Xamarin.Facebook.Login.Widget;
 
 using static Cycles.Droid.Utils.SplashAnimationHelper;
 using static Android.Gms.Common.Apis.GoogleApiClient;
+using Firebase.DynamicLinks;
+using Android.Gms.Tasks;
+using Firebase.Analytics;
+using Microsoft.AppCenter;
 
 namespace Cycles.Droid
 {
 
-    [Activity(Label = "Cycles", Icon = "@mipmap/icon", Theme = "@style/Splash", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public partial class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback
+    [Activity(Label = "Cycles", Icon = "@mipmap/icon", Theme = "@style/Splash",
+        MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+
+    public partial class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback, IOnSuccessListener
     {
         #region CONSTANTS
 
@@ -76,14 +82,12 @@ namespace Cycles.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            ISharedPreferences sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
 
-            Xamarin.Forms.Forms.SetFlags("Visual_Experimental");
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            SetContentView(Resource.Layout.Splash);
+            ISharedPreferences sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
 
-            XF.Material.Droid.Material.Init(this, savedInstanceState);
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            Xamarin.Forms.FormsMaterial.Init(this, savedInstanceState);
+            //XF.Material.Droid.Material.Init(this, savedInstanceState);
+            //Xamarin.Forms.FormsMaterial.Init(this, savedInstanceState);
 
             Crashlytics.Crashlytics.HandleManagedExceptions();
 
@@ -92,48 +96,61 @@ namespace Cycles.Droid
                  .SetApplicationId("1:316655980255:android:05c55f9b9a1c0243")
                  .Build();
 
+            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9");
+
             App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext, options);
             FirebaseAuth = FirebaseAuth.GetInstance(App);
+            FirebaseAnalytics.GetInstance(this);
+            //FirebaseDynamicLinks.Instance.GetDynamicLink(Intent).AddOnSuccessListener(this);
 
             bool firstRun = sharedPreferences.Contains(first_run);
-            bool firstRunValue = sharedPreferences.GetBoolean(first_run, true);
-            if (FirebaseAuth.CurrentUser != null && firstRun)
+
+            if (Intent.HasExtra("intent_activity") && Intent.GetStringExtra("intent_activity").Equals("LoginActivity"))
+            {
+                SplashInit();
+                DoSplashSwipe(SwipeDirection.Forward);
+                DoSplashSwipe(SwipeDirection.Forward);
+            }
+            else if (FirebaseAuth.CurrentUser != null && firstRun)
             {
                 StartActivity(new Intent(this, typeof(MainActivity)));
                 Finish();
             }
             else if (!firstRun)
             {
-                SetContentView(Resource.Layout.Splash);
                 sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
-                NextButton = FindViewById<ImageButton>(Resource.Id.next_button);
-                SkipButton = FindViewById<Button>(Resource.Id.skip_button);
-                SkipButton.Click += SkipToEnd; ;
-                NextButton.Click += NextButton_Click;
-
-                FindViewById<TextView>(Resource.Id.goto_login).Click += Goto_LoginPage;
-                ConstraintLayout pagesHolder = FindViewById<ConstraintLayout>(Resource.Id.pages_holder);
-                PagesGestureListener gestureListener = new PagesGestureListener(this);
-                GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this, gestureListener);
-
-                pagesHolder.SetOnTouchListener(new PagesGestureRecognizer(gestureDetector));
-                FindViewById<ImageView>(Resource.Id.number_signup).Click += PhoneImageViewBtn_Click;
-                FindViewById<ImageView>(Resource.Id.google_signup).Click += GoogleSignup_Click;
-                FindViewById<ImageView>(Resource.Id.facebook_signup).Click += FacebookSignup_Click;
-                SplashBaseLayout = FindViewById<RelativeLayout>(Resource.Id.base_layout);
-
-                IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
-                indicators.Number_of_Indicators = 3;
-
-                FastFitPath = FindViewById<ImageView>(Resource.Id.fast_fit_path_imageview);
-                FastFitInitialDrawable = FastFitPath.Drawable;
+                SplashInit();
             }
             else if (firstRun)
             {
-                sharedPreferences.Edit().Remove(first_run).Apply();
                 StartActivity(new Intent(this, typeof(LoginActivity)));
-                Finish();
             }
+        }
+
+        private void SplashInit()
+        {
+            NextButton = FindViewById<ImageButton>(Resource.Id.next_button);
+            SkipButton = FindViewById<Button>(Resource.Id.skip_button);
+            SkipButton.Click += SkipToEnd; ;
+            NextButton.Click += NextButton_Click;
+
+            FindViewById<TextView>(Resource.Id.goto_login).Click += Goto_LoginPage;
+            ConstraintLayout pagesHolder = FindViewById<ConstraintLayout>(Resource.Id.pages_holder);
+            PagesGestureListener gestureListener = new PagesGestureListener(this);
+            GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this, gestureListener);
+
+            pagesHolder.SetOnTouchListener(new PagesGestureRecognizer(gestureDetector));
+            FindViewById<ImageView>(Resource.Id.number_signup).Click += PhoneImageViewBtn_Click;
+            FindViewById<ImageView>(Resource.Id.google_signup).Click += GoogleSignup_Click;
+            FindViewById<ImageView>(Resource.Id.facebook_signup).Click += FacebookSignup_Click;
+            FindViewById<ImageView>(Resource.Id.email_signup).Click += EmailLayout_Click;
+            SplashBaseLayout = FindViewById<RelativeLayout>(Resource.Id.base_layout);
+
+            IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
+            indicators.Number_of_Indicators = 3;
+
+            FastFitPath = FindViewById<ImageView>(Resource.Id.fast_fit_path_imageview);
+            FastFitInitialDrawable = FastFitPath.Drawable;
         }
 
         #region Click Handlers
@@ -211,13 +228,14 @@ namespace Cycles.Droid
 
         private void EmailLayout_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            EmailSignUpFragment emailSignUp = new EmailSignUpFragment();
+            emailSignUp.Show(SupportFragmentManager, "Email_Sign_Up_Dialog");
         }
 
         private void NextButton_Click(object sender, EventArgs e)
         {
             DoSplashSwipe(SwipeDirection.Forward);
-        } 
+        }
         #endregion
 
         #region Phone number Verification Callbacks
@@ -410,6 +428,8 @@ namespace Cycles.Droid
 
         public async void OnSuccess(Java.Lang.Object result)
         {
+            _ = Log.Debug(Class.ToString(), result.Class.ToString());
+
             var success = await FirebaseAuthHelper.FirebaseAuthWithFacebook(FirebaseAuth, ((LoginResult)result).AccessToken);
             if (success)
             {

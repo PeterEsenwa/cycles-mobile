@@ -6,14 +6,22 @@
   <color name="dirty_white">#EBEBEB</color>
   <color name="colorMiddleGray">#7B7B7B</color>
   <color name="colorPrimary">#D7282F</color>
-  <color name="colorPrimaryDark">#BD151B</color>
+  <color name="colorPrimaryDark">#9e0007</color>
+  <color name="primary_text_default_light">#DED7282F</color>
+  <color name="secondary_text_default_light">#B2D7282F</color>
+  <!--<color name="primary_border_default_light">#F8D7282F</color>
+  <color name="secondary_border_default_light">#EBD7282F</color>-->
+  <color name="primary_border_default_light">#DFD7282F</color>
+  <color name="secondary_border_default_light">#C4D7282F</color>
+  <color name="colorPrimaryLight">#ff6259</color>
   <color name="colorAccent">#262626</color>
   <color name="colorError">#FFC107</color>
   <color name="cyclesBlack">#262626</color>
   <color name="cyclesBlackRipple">#BFBFBF</color>
+  <color name="transparent">#00000000</color>
   <color name="cyclesRed">#D7282F</color>
   <color name="design_snackbar_background_color">@color/cyclesBlack</color>
   <color name="cyclesBlue">#0082cb</color>
   <color name="cyclesBlueLight">#0093e6</color>
-  <color name="colorButtonNormal">#DB3E44</color>
+  <color name="colorButtonNormal">#D7282F</color>
 </resources>
