@@ -88,8 +88,9 @@
             android:layout_alignEnd="@id/emailOnlyTextView"
             android:layout_marginTop="48dp"
             android:background="@drawable/cycles_btn_default_material"
-            android:backgroundTint="@color/colorButtonNormal"
-            android:enabled="false"
+            android:backgroundTint="@color/red_btn_tint"
+            android:enabled="fal"
+            android:elevation="8dp"
             android:minWidth="92dip"
             android:text="@string/go"
             android:textColor="@color/colorWhite" />

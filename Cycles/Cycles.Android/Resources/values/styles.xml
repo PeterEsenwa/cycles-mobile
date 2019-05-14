@@ -55,10 +55,8 @@
     <item name="colorAccent">@color/colorAccent</item>
     <item name="android:colorControlNormal">@color/colorMiddleGray</item>
 
-
     <!-- Set this to true if you want Full Screen without status bar -->
     <item name="android:windowFullscreen">false</item>
-
     <item name="android:windowIsFloating">false</item>
 
     <!-- This is important! Don't forget to set window background -->
@@ -77,6 +75,7 @@
   </style>
 
   <style name="EmailSignUpDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+    <item name="colorAccent">@color/colorAccent</item>
     <item name="android:windowBackground">@color/transparent</item>
   </style>
 </resources>

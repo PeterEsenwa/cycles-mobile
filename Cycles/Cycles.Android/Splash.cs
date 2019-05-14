@@ -38,6 +38,7 @@ using static Android.Gms.Common.Apis.GoogleApiClient;
 using Firebase.DynamicLinks;
 using Android.Gms.Tasks;
 using Firebase.Analytics;
+using Microsoft.AppCenter;
 
 namespace Cycles.Droid
 {
@@ -97,17 +98,15 @@ namespace Cycles.Droid
                  .SetApplicationId("1:316655980255:android:05c55f9b9a1c0243")
                  .Build();
 
+            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9");
+
             App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext, options);
             FirebaseAuth = FirebaseAuth.GetInstance(App);
             FirebaseAnalytics.GetInstance(this);
             //FirebaseDynamicLinks.Instance.GetDynamicLink(Intent).AddOnSuccessListener(this);
 
             bool firstRun = sharedPreferences.Contains(first_run);
-            //bool firstRunValue = sharedPreferences.GetBoolean(first_run, true);
-            //if (data != null)
-            //{
-            //    SplashInit(sharedPreferences);
-            //}
+
             if (FirebaseAuth.CurrentUser != null && firstRun)
             {
                 StartActivity(new Intent(this, typeof(MainActivity)));
@@ -119,9 +118,7 @@ namespace Cycles.Droid
             }
             else if (firstRun)
             {
-                sharedPreferences.Edit().Remove(first_run).Apply();
                 StartActivity(new Intent(this, typeof(LoginActivity)));
-                Finish();
             }
         }
 

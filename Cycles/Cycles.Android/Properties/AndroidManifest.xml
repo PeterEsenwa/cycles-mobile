@@ -22,6 +22,13 @@
   <uses-feature android:name="android.hardware.location" android:required="true" />
   <uses-feature android:name="android.hardware.location.gps" android:required="true" />
   <uses-feature android:name="android.hardware.location.network" android:required="true" />
+
+  <service android:name="com.google.firebase.components.ComponentDiscoveryService" >
+    <meta-data
+        android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+        android:value="com.google.firebase.components.ComponentRegistrar" />
+  </service>
+  
   <permission-group android:name="Location" android:description="@string/locationPermissionDesc" android:icon="@drawable/ic_round_location_on" android:label="@string/locationPermissionLabel" />
   <permission android:name="com.Kinesys.Cycles.permission.MAPS_RECEIVE" android:protectionLevel="signature" />
   <application android:label="Cycles" android:icon="@mipmap/icon">

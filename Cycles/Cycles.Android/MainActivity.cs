@@ -68,7 +68,7 @@ namespace Cycles.Droid
             {
                 app = new App();
             }
-            //LoadApplication(app);
+            LoadApplication(app);
         }
 
         protected override void OnStart()

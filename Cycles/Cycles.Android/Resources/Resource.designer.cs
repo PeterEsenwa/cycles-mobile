@@ -10853,6 +10853,9 @@ namespace Cycles.Droid
 			// aapt resource value: 0x7f0e00b9
 			public const int primary_text_red = 2131624121;
 			
+			// aapt resource value: 0x7f0e00ba
+			public const int red_btn_tint = 2131624122;
+			
 			// aapt resource value: 0x7f0e004f
 			public const int ripple_material_dark = 2131624015;
 			
@@ -10883,11 +10886,11 @@ namespace Cycles.Droid
 			// aapt resource value: 0x7f0e0056
 			public const int switch_thumb_disabled_material_light = 2131624022;
 			
-			// aapt resource value: 0x7f0e00ba
-			public const int switch_thumb_material_dark = 2131624122;
-			
 			// aapt resource value: 0x7f0e00bb
-			public const int switch_thumb_material_light = 2131624123;
+			public const int switch_thumb_material_dark = 2131624123;
+			
+			// aapt resource value: 0x7f0e00bc
+			public const int switch_thumb_material_light = 2131624124;
 			
 			// aapt resource value: 0x7f0e0057
 			public const int switch_thumb_normal_material_dark = 2131624023;
@@ -10904,8 +10907,8 @@ namespace Cycles.Droid
 			// aapt resource value: 0x7f0e0085
 			public const int transparent = 2131624069;
 			
-			// aapt resource value: 0x7f0e00bc
-			public const int white_disabled_material = 2131624124;
+			// aapt resource value: 0x7f0e00bd
+			public const int white_disabled_material = 2131624125;
 			
 			static Color()
 			{
