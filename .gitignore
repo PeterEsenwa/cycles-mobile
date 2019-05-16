@@ -261,3 +261,5 @@ __pycache__/
 *.pyc
 /Cycles/Cycles.Android/Resources/drawable/codealike.json
 /Cycles/Cycles.Android/Resources/drawable/temp.xml
+/Cycles/Cycles.Android/codealike.json
+/Cycles/Cycles.Android/linker.xml

@@ -82,6 +82,11 @@ namespace Cycles
                 var scanPage = new CustomBarcodeScanner();
                 await Navigation.PushModalAsync(scanPage);
             });
+            MessagingCenter.Subscribe<MainActivity>(this, "Scanner Opened", async (mapPage) =>
+            {
+                var scanPage = new CustomBarcodeScanner();
+                await Navigation.PushModalAsync(scanPage);
+            });
             MessagingCenter.Subscribe<MainActivity>(this, "Close Scanner", async (sender) =>
             {
                 if (Navigation.NavigationStack.Count > 0)

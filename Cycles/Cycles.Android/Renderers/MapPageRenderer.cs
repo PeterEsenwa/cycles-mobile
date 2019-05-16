@@ -1,13 +1,20 @@
-﻿using Android.Content;
+﻿using Android;
+using Android.Content;
+using Android.Content.PM;
+using Android.Content.Res;
 using Android.Gms.Common;
 using Android.Gms.Common.Apis;
 using Android.Gms.Location;
 using Android.Gms.Maps;
 using Android.Gms.Maps.Model;
 using Android.Graphics;
+using Android.Hardware.Camera2;
 using Android.Locations;
 using Android.OS;
+using Android.Runtime;
 using Android.Support.Design.Widget;
+using Android.Support.V4.App;
+using Android.Support.V4.Content;
 using Android.Support.V7.App;
 using Android.Util;
 using Android.Views;
@@ -63,6 +70,7 @@ namespace Cycles.Droid.Renderers
 
         //private MapPage MapPage { get; set; }
         public MainActivity mainActivity { get; private set; }
+        private const int REQUEST_CAMERA_ID  = 10;
 
         public MapPageRenderer(Context context) : base(context)
         {
@@ -157,20 +165,46 @@ namespace Cycles.Droid.Renderers
 
         private void ScanBarcode_Click(object sender, EventArgs e)
         {
-            MessagingCenter.Send(this, "Scanner Opened");
-            //var scanner = new ZXingScannerView();
-            //var scanPage = new ZXingScannerPage(new MobileBarcodeScanningOptions {AutoRotate = true});
-            //scanPage.OnScanResult += (result) =>
-            //{
-            //    scanPage.IsScanning = false;
+            if (ContextCompat.CheckSelfPermission(mainActivity, Manifest.Permission.Camera) != (int)Permission.Granted)
+            {
+                if (ActivityCompat.ShouldShowRequestPermissionRationale(mainActivity, Manifest.Permission.Camera))
+                {
+                    AView layout = FindViewById(Android.Resource.Id.Content);
+                    Snackbar snackbar = Snackbar
+                        .Make(AndroidCoordinatorLayout, "Allow access to your phone's camera. Swipe right to dismiss", Snackbar.LengthIndefinite)
+                        .SetAction("Allow", v => RequestCameraPermission())
+                        .SetActionTextColor(ContextCompat.GetColorStateList(Context, Resource.Color.permission_snackbar_button));
+                    snackbar.View.SetBackgroundResource(Resource.Drawable.rounded_bg_r4);
 
-            //    Device.BeginInvokeOnMainThread(() =>
-            //    {
-            //        Application.Current.MainPage = App.rootPage;
-            //        //DisplayAlert("Scanned Barcode", result.Text, "OK");
-            //    });
-            //};
-            //Application.Current.MainPage = new NavigationPage(scanPage);
+                    int[][] states = new int[][] {
+                        new int[] { Android.Resource.Attribute.StateEnabled}
+                    };
+
+                    int[] colors = new int[] {
+                        mainActivity.GetColor(Resource.Color.cyclesBlueLight)
+                    };
+
+                    snackbar.View.BackgroundTintList = new ColorStateList(states, colors);
+                    ((CoordinatorLayout.LayoutParams)snackbar.View.LayoutParameters).SetMargins(16, 32, 16, 32);
+                    snackbar.Show();
+                }
+                else
+                {
+                    RequestCameraPermission();
+                }
+            }
+            else
+            {
+                MessagingCenter.Send(this, "Scanner Opened");
+            }
+        }
+
+        private void RequestCameraPermission()
+        {
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
+            {
+                mainActivity.RequestPermissions(new string[] { Manifest.Permission.Camera }, REQUEST_CAMERA_ID);
+            }
         }
 
         private void RefreshMap(object sender, EventArgs e)
@@ -294,7 +328,7 @@ namespace Cycles.Droid.Renderers
             }
         }
 
-        public override async void AddView(AView child)
+        public override void AddView(AView child)
         {
             child.RemoveFromParent();
             base.AddView(child);
@@ -367,5 +401,7 @@ namespace Cycles.Droid.Renderers
                 }
             }
         }
+
+
     }
 }

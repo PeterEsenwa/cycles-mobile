@@ -54,7 +54,7 @@ namespace Cycles.Droid
                     }
                     catch (System.Exception e)
                     {
-                        Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(e));
+                        Crashlytics.Crashlytics.LogException(Throwable.FromException(e));
                     }
                 }
 
