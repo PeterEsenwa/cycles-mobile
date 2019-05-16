@@ -43,6 +43,7 @@ namespace Cycles.Droid
         private static readonly SparseIntArray ORIENTATIONS = new SparseIntArray(4);
         private static readonly string TAG = "MLKIT";
         private static readonly string MY_CAMERA_ID = "my_camera_id";
+        private const int REQUEST_CAMERA_ID = 10;
         private const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
         private bool IsScanOpen { get; set; }
 
@@ -196,6 +197,25 @@ namespace Cycles.Droid
                     {
                         RequestPermissions(LocationPermissions, REQUEST_LOCATION_ID);
                     }
+                }
+            }
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            switch (requestCode)
+            {
+                case REQUEST_CAMERA_ID:
+                {
+                    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                    {
+                        IsScanOpen = true;
+                        MessagingCenter.Send(this, "Scanner Opened");
+                    }
+                    else
+                    {
+                    }
+                    break;
                 }
             }
         }
