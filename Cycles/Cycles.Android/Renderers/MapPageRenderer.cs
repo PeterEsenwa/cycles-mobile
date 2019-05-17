@@ -63,7 +63,6 @@ namespace Cycles.Droid.Renderers
 
         FusedLocationProviderClient fusedLocationProviderClient;
 
-
         private static CyclesMapRenderer MyMapView { get; set; }
         private const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
         private const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
