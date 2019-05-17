@@ -85,20 +85,6 @@
 
 			/>
         </android.support.design.widget.TextInputLayout>
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:text="password"
-                android:fontFamily="@font/montserrat_regular"
-                android:textColor="@color/cyclesBlack"
-                android:textSize="16sp"
-                android:hint="Password"
-			/>
-        </android.support.design.widget.TextInputLayout>
     </LinearLayout>
     <ImageButton
         android:id="@+id/login_button"
