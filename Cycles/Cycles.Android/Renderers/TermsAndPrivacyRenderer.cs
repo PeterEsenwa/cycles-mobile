@@ -20,9 +20,7 @@ namespace Cycles.Droid.Renderers
 {
     class TermsAndPrivacyRenderer : PageRenderer
     {
-        private float toolbarHeight;
-
-        public CoordinatorLayout _androidCoordinatorLayout { get; private set; }
+        private CoordinatorLayout _androidCoordinatorLayout { get; set; }
 
         private AppBarLayout _androidAppBarLayout;
         private MainActivity mainActivity;
@@ -32,20 +30,13 @@ namespace Cycles.Droid.Renderers
 
         public TermsAndPrivacyRenderer(Context context) : base(context)
         {
-            mainActivity = Context as MainActivity;
-            toolbarHeight = TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
+            mainActivity = (MainActivity) Context;
 
             _androidCoordinatorLayout = (CoordinatorLayout) mainActivity.LayoutInflater.Inflate(Resource.Layout.TermsAndPrivacy, null);
 
             _androidAppBarLayout = _androidCoordinatorLayout.FindViewById<AppBarLayout>(Resource.Id.termsAppBar);
 
             toolbar = _androidAppBarLayout.FindViewById<Toolbar>(Resource.Id.termsToolBar);
-            toolbar.FindViewById<Android.Widget.ImageButton>(Resource.Id.gift_button).Visibility = ViewStates.Invisible;
-
-            //if (toolbar.LayoutParameters != null)
-            //{
-            //    ((AppBarLayout.LayoutParams)toolbar.LayoutParameters).ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagEnterAlways;
-            //}
 
             mainActivity?.SetSupportActionBar(toolbar);
             ActionBar actionBar = mainActivity?.SupportActionBar;
@@ -62,15 +53,6 @@ namespace Cycles.Droid.Renderers
             tabLayout = _androidAppBarLayout.FindViewById<TabLayout>(Resource.Id.tabLayout1);
             tabLayout.SetupWithViewPager(viewPager);
 
-            AddView(_androidCoordinatorLayout);
-
-            //mainActivity.SetSupportActionBar(toolbar);
-            //ActionBar actionBar = mainActivity.SupportActionBar;
-
-            //actionBar.SetDisplayHomeAsUpEnabled(true);
-            //actionBar.SetDisplayShowHomeEnabled(true);
-            //actionBar.SetDisplayShowTitleEnabled(false);
-
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
@@ -78,8 +60,8 @@ namespace Cycles.Droid.Renderers
             base.OnElementChanged(e);
             if (e.NewElement != null)
             {
+                AddView(_androidCoordinatorLayout);
                 viewPager.Adapter = new CustomPagerAdapter(this, e.NewElement as TermsAndPrivacy);
-              
             }
         }
 

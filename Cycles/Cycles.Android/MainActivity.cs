@@ -69,6 +69,14 @@ namespace Cycles.Droid
             {
                 app = new App();
             }
+            var dm = new DisplayMetrics();
+            var windowManager = GetSystemService(WindowService).JavaCast<IWindowManager>();
+
+            windowManager.DefaultDisplay.GetRealMetrics(dm);
+            App.ScreenHeight = (int)Math.Ceiling(dm.Ydpi);
+            App.ScreenWidth = (int)Math.Ceiling(dm.Xdpi);
+            App.ScreenDensity = dm.Density;
+
             LoadApplication(app);
         }
 
@@ -77,14 +85,6 @@ namespace Cycles.Droid
             base.OnStart();
 
             AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
-
-            var dm = new DisplayMetrics();
-            var windowManager = GetSystemService(WindowService).JavaCast<IWindowManager>();
-
-            windowManager.DefaultDisplay.GetRealMetrics(dm);
-            App.ScreenHeight = (int)Math.Ceiling(dm.Ydpi);
-            App.ScreenWidth = (int)Math.Ceiling(dm.Xdpi);
-            App.ScreenDensity = dm.Density;
 
             AlertDialog = new AlertDialog.Builder(this);
             MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", (mapPage) =>

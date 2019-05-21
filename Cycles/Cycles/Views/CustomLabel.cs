@@ -32,8 +32,8 @@ namespace Cycles.Views
         // Just remember to...
 
         public NamedSize NamedFontSize {
-            get { return (NamedSize)GetValue(NamedFontSizeProperty); }
-            set { SetValue(NamedFontSizeProperty, value); }
+            private get => (NamedSize)GetValue(NamedFontSizeProperty);
+            set => SetValue(NamedFontSizeProperty, value);
         }
 
         private static void OnNamedFontSizeChanged(BindableObject bindable, object oldValue, object newValue)
@@ -42,17 +42,17 @@ namespace Cycles.Views
         }
 
 
-        public virtual void OnFontSizeChangedImpl()
+        protected virtual void OnFontSizeChangedImpl()
         {
             double density = (App.ScreenWidth + App.ScreenHeight) / 2;
-            density = density / 160;
+            density /= 160;
 
             density = ((density - 1) / 3) + 1;
             if (Device.Idiom == TargetIdiom.Tablet)
             {
-                density = density * 2;
+                density *= 2;
             }
-            double namedFontSize = Device.GetNamedSize(NamedFontSize, typeof(Label));
+            var namedFontSize = Device.GetNamedSize(NamedFontSize, typeof(Label));
             FontSize = FontSizeFactor * namedFontSize * density;
             InvalidateMeasure();
         }
