@@ -299,7 +299,7 @@ namespace Cycles.Droid.Renderers
 
             if (e.NewElement != null)
             {
-                MessagingCenter.Send(this, "Remove Lockscreen");
+                MessagingCenter.Send(this, "Remove Lock-screen");
             }
         }
 
