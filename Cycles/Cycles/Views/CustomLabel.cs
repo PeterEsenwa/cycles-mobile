@@ -12,8 +12,8 @@ namespace Cycles.Views
           propertyChanged: OnFontSizeFactorChanged);
 
         public double FontSizeFactor {
-            get { return (double)GetValue(FontSizeFactorProperty); }
-            set { SetValue(FontSizeFactorProperty, value); }
+            private get => (double)GetValue(FontSizeFactorProperty);
+            set => SetValue(FontSizeFactorProperty, value);
         }
 
         private static void OnFontSizeFactorChanged(BindableObject bindable, object oldValue, object newValue)
