@@ -15,7 +15,6 @@ namespace Cycles.Droid.Renderers
     public class DashboardRenderer : PageRenderer
     {
         private LinearLayout _androidLinearLayout;
-        private float toolbarHeight;
         private AppBarLayout _androidAppBarLayout;
         private MainActivity mainActivity;
         private Toolbar toolbar;
@@ -30,22 +29,17 @@ namespace Cycles.Droid.Renderers
                 LayoutParameters = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent)
             };
 
-            toolbarHeight = TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
-            _androidAppBarLayout = new AppBarLayout(Context)
-            {
-                LayoutParameters = new LinearLayout.LayoutParams(LayoutParams.MatchParent, (int)toolbarHeight)
-            };
+            _androidAppBarLayout = (AppBarLayout)LayoutInflater.FromContext(context).Inflate(Resource.Layout.Toolbar, null);
 
-            toolbar = (Toolbar)LayoutInflater.FromContext(context).Inflate(Resource.Layout.Toolbar, null);
-            toolbar.FindViewById<TextView>(Resource.Id.cycles_text).Gravity = GravityFlags.Center;
+            toolbar = (Toolbar)_androidAppBarLayout.FindViewById(Resource.Id.toolbar);
             toolbar.FindViewById<TextView>(Resource.Id.cycles_text).Text = "Dashboard";
             toolbar.FindViewById<Android.Widget.ImageButton>(Resource.Id.gift_button).SetImageResource(Resource.Drawable.edit_pencil);
-            _androidAppBarLayout.AddView(toolbar);
-            
-            ((AppBarLayout.LayoutParams) toolbar.LayoutParameters).Height = LayoutParams.WrapContent;
-            ((AppBarLayout.LayoutParams) toolbar.LayoutParameters).Width = LayoutParams.MatchParent;
-            
+
             _androidLinearLayout.AddView(_androidAppBarLayout);
+
+            _androidAppBarLayout.LayoutParameters =
+                new LinearLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.WrapContent);
+
             AddView(_androidLinearLayout);
 
             mainActivity.SetSupportActionBar(toolbar);
@@ -59,18 +53,12 @@ namespace Cycles.Droid.Renderers
         public override void AddView(Android.Views.View child)
         {
             base.AddView(child);
-            if (!(child is LinearLayout))
-            {
-                child.RemoveFromParent();
-                _androidLinearLayout.AddView(child);
-                child.LayoutParameters = new LinearLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
-                scrollView = child;
-            }
-        }
+            if (child is LinearLayout) return;
 
-        protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
-        {
-            base.OnElementChanged(e);
+            child.RemoveFromParent();
+            _androidLinearLayout.AddView(child);
+            child.LayoutParameters = new LinearLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
+            scrollView = child;
         }
 
         protected override void OnLayout(bool changed, int l, int t, int r, int b)
@@ -87,7 +75,8 @@ namespace Cycles.Droid.Renderers
                 if (scrollView != null)
                 {
                     scrollView.Measure(msw, msh);
-                    scrollView.Layout(0, (int)toolbarHeight, r - l, b - t);
+                    var toolbarHeight = _androidAppBarLayout.Height;
+                    scrollView.Layout(0, toolbarHeight, r - l, b - t);
                 }
             }
         }

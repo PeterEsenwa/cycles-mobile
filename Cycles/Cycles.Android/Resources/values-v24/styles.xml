@@ -3,6 +3,7 @@
 
   <style name="MainTheme" parent="MainTheme.Base">
     <item name="android:windowNoTitle">true</item>
+    <item name="colorPrimary">@color/colorPrimary</item>
   </style>
   <!-- Base theme applied no matter what API -->
   <style name="MainTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
@@ -13,9 +14,11 @@
     <item name="windowActionBar">false</item>
     <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
     <!-- colorPrimary is used for the default action bar background -->
-    <item name="colorPrimary">#AC2026</item>
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <!-- <item name="colorPrimary">#AC2026</item> -->
     <!-- colorPrimaryDark is used for the status bar -->
-    <item name="colorPrimaryDark">#AC2026</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <!-- <item name="colorPrimaryDark">#AC2026</item> -->
     <!-- colorAccent is used as the default value for colorControlActivated
              which is used to tint widgets -->
     <item name="colorAccent">#262626</item>
@@ -26,7 +29,7 @@
 
     <item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
   </style>
-  
+
   <style name="Onboards" parent="Splash">
     <item name="android:windowBackground">@color/launcher_background</item>
 
@@ -66,7 +69,7 @@
     <!--<item name="android:windowEnterAnimation">@anim/slide_up</item>
     <item name="android:windowExitAnimation">@anim/slide_down</item>-->
   </style>
-  
+
   <style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
     <item name="colorAccent">@color/colorAccent</item>
     <item name="colorPrimaryDark">@color/colorWhite</item>

@@ -94,14 +94,14 @@ namespace Cycles.Droid.Renderers
             
             map.SetPadding(left, top, right, bottom);
             map.SetMapStyle(MapStyleOptions.LoadRawResourceStyle(Context, Resource.Raw.my_map_customization));
-            map.MyLocationEnabled = false;
-            map.UiSettings.ZoomControlsEnabled = false;
-            map.UiSettings.MyLocationButtonEnabled = false;
             map.InfoWindowClick += OnInfoWindowClick;
             map.SetInfoWindowAdapter(this);
 
             base.OnMapReady(map);
             nativeMap = NativeMap;
+            nativeMap.MyLocationEnabled = false;
+            nativeMap.UiSettings.ZoomControlsEnabled = false;
+            nativeMap.UiSettings.MyLocationButtonEnabled = false;
         }
         
         protected override MarkerOptions CreateMarker(Pin pin)

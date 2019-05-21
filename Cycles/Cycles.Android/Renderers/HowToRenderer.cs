@@ -25,8 +25,6 @@ namespace Cycles.Droid.Renderers
         {
             mainActivity = Context as MainActivity;
 
-            toolbarHeight = TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
-
             _androidLinearLayout = new LinearLayout(Context)
             {
                 LayoutParameters = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent)
@@ -67,6 +65,15 @@ namespace Cycles.Droid.Renderers
                 _androidLinearLayout.AddView(child);
                 child.LayoutParameters = new LinearLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
                 webView = child;
+            }
+        }
+
+        protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
+        {
+            base.OnElementChanged(e);
+            if (e.NewElement != null)
+            {
+                toolbarHeight = TypedValue.ApplyDimension(ComplexUnitType.Dip, 48, Resources.DisplayMetrics);
             }
         }
 
