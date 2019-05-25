@@ -51,39 +51,71 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.v7.widget.SearchView
-            android:id="@+id/map_search"
-            app:queryBackground="@android:color/transparent"
-            android:background="@drawable/map_search_background"
-            app:submitBackground="@color/cyclesBlackRipple"
-            app:iconifiedByDefault="false"
-            app:voiceIcon="@drawable/search_voice"
-            app:searchHintIcon="@null"
-            app:queryHint="Search Community"
-            android:textSize="24sp"
-            android:textColor="@color/cyclesBlack"
-            android:fontFamily="@font/montserrat_regular"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="64dp"
-            android:layout_marginStart="48dp"
-            android:layout_marginEnd="48dp"
-            android:inputType="textCapWords"
-            android:elevation="8dp"
-            android:maxLines="1"
-            android:imeOptions="actionSearch"
-            android:paddingVertical="@dimen/design_snackbar_padding_vertical"
-            android:paddingHorizontal="@dimen/design_snackbar_padding_horizontal"
-		/>
-
         <RelativeLayout
             android:id="@+id/map_holder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="48dp">
+            <Cycles.Droid.CustomViews.SearchEditTextLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/search_view_container"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/search_top_margin"
+                android:layout_marginBottom="@dimen/search_bottom_margin"
+                android:layout_marginLeft="@dimen/search_margin_horizontal"
+                android:layout_marginRight="@dimen/search_margin_horizontal"
+                android:background="@drawable/map_search_background"
+                android:elevation="@dimen/search_box_elevation">
+                <LinearLayout
+                    android:id="@+id/search_box_collapsed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/search_box_left_padding"
+                    android:paddingEnd="@dimen/search_box_right_padding"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/search_magnifying_glass"
+                        android:layout_height="@dimen/search_box_icon_size"
+                        android:layout_width="@dimen/search_box_icon_size"
+                        android:layout_margin="@dimen/search_box_icon_margin"
+                        android:src="@drawable/ic_search_dark"
+                        android:importantForAccessibility="no"
+                        android:gravity="center_vertical"
+                        android:tint="@color/searchbox_icon_tint" />
+                    <EditText
+                        android:id="@+id/search_box_start_search"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="@dimen/search_box_collapsed_text_margin_left"
+                        android:textSize="@dimen/search_collapsed_text_size"
+                        android:fontFamily="@font/montserrat"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:background="@android:color/transparent"
+                        android:gravity="center_vertical"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:hint="eg. Covenant University" />
 
+                    <ImageButton
+                        android:id="@+id/dialtacts_options_menu_button"
+                        android:layout_width="@dimen/search_box_icon_size"
+                        android:layout_height="@dimen/search_box_icon_size"
+                        android:layout_margin="@dimen/search_box_icon_margin"
+                        android:gravity="center_vertical"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/baseline_menu_white_24"
+                        android:contentDescription="@string/action_menu_overflow_description"
+                        android:tint="@color/searchbox_icon_tint" />
+
+                </LinearLayout>
+
+            </Cycles.Droid.CustomViews.SearchEditTextLayout>
         </RelativeLayout>
 
         <RelativeLayout

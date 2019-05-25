@@ -91,7 +91,6 @@ namespace Cycles.Droid.Renderers
             StartCameraSource();
         }
 
-        [Obsolete]
         private void TorchFab_Click(object sender, EventArgs e)
         {
             if (CoreCamera == null)

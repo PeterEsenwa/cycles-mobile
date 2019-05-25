@@ -39,6 +39,8 @@ using Firebase.DynamicLinks;
 using Android.Gms.Tasks;
 using Firebase.Analytics;
 using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace Cycles.Droid
 {
@@ -96,7 +98,7 @@ namespace Cycles.Droid
                  .SetApplicationId("1:316655980255:android:05c55f9b9a1c0243")
                  .Build();
 
-            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9");
+            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
 
             App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext, options);
             FirebaseAuth = FirebaseAuth.GetInstance(App);

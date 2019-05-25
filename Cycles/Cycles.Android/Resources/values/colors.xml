@@ -2,7 +2,7 @@
 <resources>
   <color name="launcher_background">#FFFFFF</color>
   <color name="colorWhite">#FFFFFF</color>
-  <color name="colorHalfWhite">#95FFFFFF</color>
+  <color name="colorHalfWhite">#CCFFFFFF</color>
   <color name="dirty_white">#EBEBEB</color>
   <color name="colorMiddleGray">#7B7B7B</color>
   <color name="colorPrimary">#D7282F</color>
@@ -23,5 +23,8 @@
   <color name="design_snackbar_background_color">@color/cyclesBlack</color>
   <color name="cyclesBlue">#0082cb</color>
   <color name="cyclesBlueLight">#0093e6</color>
+
+  <color name="searchbox_icon_tint">#a4a4a4</color>
+
   <color name="colorButtonNormal">#D7282F</color>
 </resources>
