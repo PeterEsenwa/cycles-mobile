@@ -25,4 +25,6 @@
   <string name="connection_failed">Connection failed, please check your internet connection</string>
   <string name="cycles_black_logo">cycles_black_logo</string>
   <string name="go">GO</string>
+  <string name="action_menu_overflow_description">More options</string>
+  <string name="description_start_voice_search">Start voice search</string>
 </resources>

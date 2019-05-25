@@ -3,6 +3,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.Gms.Common.Apis;
 using Android.Gms.Location;
+using Android.Hardware.Camera2;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -10,26 +11,25 @@ using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Util;
 using Android.Views;
+using Android.Widget;
+
 using Cycles.Droid.Renderers;
+
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using System;
-using Android.Content;
-using Android.Hardware.Camera2;
-using Android.Support.Annotation;
-using Firebase;
-using Firebase.ML.Vision.Common;
-using Xamarin;
-using Xamarin.Forms;
-using Application = Xamarin.Forms.Application;
-using Image = Android.Media.Image;
-using Android.Widget;
-using Device = Xamarin.Forms.Device;
+
 using Rg.Plugins.Popup;
 using Rg.Plugins.Popup.Services;
-using Xamarin.Essentials;
+
+using System;
 using System.Threading.Tasks;
+
+using Xamarin;
+using Xamarin.Essentials;
+using Xamarin.Forms;
+
+using Device = Xamarin.Forms.Device;
 
 namespace Cycles.Droid
 {
