@@ -24,6 +24,7 @@ using Cycles.Droid.Services;
 using Rg.Plugins.Popup.Services;
 using System;
 using System.Threading.Tasks;
+using Cycles.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using static Android.Support.Design.Widget.AppBarLayout.LayoutParams;
@@ -123,7 +124,7 @@ namespace Cycles.Droid.Renderers
 
             if (closestBikeFab != null) closestBikeFab.Click += FindClosestBike;
 
-            if (scanBarcode != null) scanBarcode.Click += ScanBarcode_Click;
+            if (scanBarcode != null) scanBarcode.Click += ScanBarcode_ClickAsync;
 
             if (locateMeFab != null) locateMeFab.Click += LocateMe;
 
@@ -202,7 +203,7 @@ namespace Cycles.Droid.Renderers
             PopupNavigation.Instance.PushAsync(new Views.GiftPopup());
         }
 
-        private void ScanBarcode_Click(object sender, EventArgs e)
+        private async void ScanBarcode_ClickAsync(object sender, EventArgs e)
         {
             if (ContextCompat.CheckSelfPermission(MainActivity, Manifest.Permission.Camera) != (int) Permission.Granted)
             {
@@ -238,7 +239,8 @@ namespace Cycles.Droid.Renderers
             }
             else
             {
-                MessagingCenter.Send(this, "Scanner Opened");
+                var scanPage = new CustomBarcodeScanner();
+                await Application.Current.MainPage.Navigation.PushModalAsync(scanPage);
             }
         }
 

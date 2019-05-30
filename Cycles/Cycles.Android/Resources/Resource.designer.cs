@@ -7706,6 +7706,9 @@ namespace Cycles.Droid
 			// aapt resource value: 0x7f100077
 			public const int clip_vertical = 2131755127;
 			
+			// aapt resource value: 0x7f1000c1
+			public const int closeScannerBtn = 2131755201;
+			
 			// aapt resource value: 0x7f10014c
 			public const int code_edittexts_holder = 2131755340;
 			
@@ -7966,9 +7969,6 @@ namespace Cycles.Droid
 			
 			// aapt resource value: 0x7f10008f
 			public const int image = 2131755151;
-			
-			// aapt resource value: 0x7f1000c1
-			public const int imageButton = 2131755201;
 			
 			// aapt resource value: 0x7f100169
 			public const int indeterminateBar = 2131755369;
