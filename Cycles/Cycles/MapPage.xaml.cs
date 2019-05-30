@@ -44,7 +44,6 @@ namespace Cycles
                     Device.BeginInvokeOnMainThread(() =>
                         MProgressBar.ProgressTo(MProgressBar.Progress + 0.005, 500, Easing.Linear));
                     return true;
-
                 });
             }
             catch (Exception ex)
@@ -77,31 +76,29 @@ namespace Cycles
             MMap.Pins.Add(pin);
             MMap.Pins.Add(pin2);
 
-            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", async (mapPage) =>
-            {
-                var scanPage = new CustomBarcodeScanner();
-                await Navigation.PushModalAsync(scanPage);
-            });
             MessagingCenter.Subscribe<MainActivity>(this, "Scanner Opened", async (mapPage) =>
             {
                 var scanPage = new CustomBarcodeScanner();
-                await Navigation.PushModalAsync(scanPage);
+                if (Application.Current.MainPage.Navigation.ModalStack.Count == 0)
+                {
+                    await Application.Current.MainPage.Navigation.PushModalAsync(scanPage);
+                }
             });
             MessagingCenter.Subscribe<MainActivity>(this, "Close Scanner", async (sender) =>
             {
-                if (Navigation.NavigationStack.Count > 0)
+                if (Application.Current.MainPage.Navigation.ModalStack.Count > 0)
                 {
-                    await Navigation.PopModalAsync();
+                    await Application.Current.MainPage.Navigation.PopModalAsync();
                 }
             });
-            MessagingCenter.Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker>(this, "Close Scanner",
-                async (sender) =>
+            MessagingCenter.Subscribe<BarcodeScannerRenderer
+                .GraphicBarcodeTracker>(this, "Close Scanner", async (sender) =>
+            {
+                if (Application.Current.MainPage.Navigation.ModalStack.Count > 0)
                 {
-                    if (Navigation.ModalStack.Count > 0)
-                    {
-                        await Navigation.PopModalAsync();
-                    }
-                });
+                    await Application.Current.MainPage.Navigation.PopModalAsync();
+                }
+            });
         }
 
         protected override async void OnSizeAllocated(double width, double height)

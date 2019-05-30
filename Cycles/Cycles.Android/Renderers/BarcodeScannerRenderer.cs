@@ -30,6 +30,7 @@ using Android.Support.Design.Widget;
 using Android.Content.PM;
 using Xamarin.Essentials;
 using Android.Hardware;
+using ImageButton = Android.Widget.ImageButton;
 
 [assembly: ExportRenderer(typeof(CustomBarcodeScanner), typeof(BarcodeScannerRenderer))]
 
@@ -41,6 +42,7 @@ namespace Cycles.Droid.Renderers
         const string TAG = "BarcodeTracker";
         private CameraSource MCameraSource { get; set; }
         private bool _previouslyScanned { get; set; }
+        private ImageButton CloseScannerButton { get; set; }
         private CameraSourcePreview CameraSourcePreview { get; set; }
         private GraphicOverlay MGraphicOverlay { get; set; }
         public Android.Hardware.Camera CoreCamera { get; private set; }
@@ -52,6 +54,11 @@ namespace Cycles.Droid.Renderers
                 (ConstraintLayout)LayoutInflater.FromContext(context).Inflate(Resource.Layout.BarcodeTracker, null);
             AddView(MainLayout);
             CameraSourcePreview = MainLayout.FindViewById<CameraSourcePreview>(Resource.Id.preview);
+            CloseScannerButton = MainLayout.FindViewById<ImageButton>(Resource.Id.closeScannerBtn);
+            CloseScannerButton.Click += async delegate
+            {
+                await Xamarin.Forms.Application.Current.MainPage.Navigation.PopModalAsync();
+            };
             //ControlsBox = MainLayout.FindViewById<Android.Widget.RelativeLayout>(Resource.Id.controls_overlay);
             MGraphicOverlay = MainLayout.FindViewById<GraphicOverlay>(Resource.Id.faceOverlay);
 
