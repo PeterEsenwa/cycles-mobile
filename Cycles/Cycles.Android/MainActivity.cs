@@ -1,4 +1,5 @@
-﻿using Android;
+﻿using System;
+using Android;
 using Android.App;
 using Android.Content.PM;
 using Android.Gms.Common.Apis;
@@ -12,24 +13,25 @@ using Android.Support.V4.Content;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-
 using Cycles.Droid.Renderers;
-
+using Java.Util;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-
 using Rg.Plugins.Popup;
 using Rg.Plugins.Popup.Services;
-
-using System;
+using System.Linq;
 using System.Threading.Tasks;
-
+using Android.Content;
+using Android.Content.Res;
+using Android.Support.V4.Content.Res;
+using Java.Lang;
 using Xamarin;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-
 using Device = Xamarin.Forms.Device;
+using Exception = System.Exception;
+using Math = System.Math;
 
 namespace Cycles.Droid
 {
@@ -39,12 +41,54 @@ namespace Cycles.Droid
     {
         //, ShowWhenLocked = true
         AlertDialog.Builder AlertDialog { get; set; }
-        private const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+
+        private const long HIGH_ACC_INTERVAL_IN_MILLISECONDS = 30000;
+        private const long FASTEST_HIGH_ACC_UPDATE_INTERVAL = HIGH_ACC_INTERVAL_IN_MILLISECONDS / 3;
+
+        private const long BAL_ACC_INTERVAL_IN_MILLISECONDS = 10000;
+        private const long FASTEST_BAL_ACC_UPDATE_INTERVAL = BAL_ACC_INTERVAL_IN_MILLISECONDS / 2;
+
         private static readonly SparseIntArray ORIENTATIONS = new SparseIntArray(4);
         private static readonly string TAG = "MLKIT";
         private static readonly string MY_CAMERA_ID = "my_camera_id";
+        private static bool _isLocationAccessGranted;
+        private static bool _isLocationEnabled;
+
         private const int REQUEST_CAMERA_ID = 10;
-        private const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+        private const int REQUEST_LOCATION_ID = 0;
+        private const int ESSENTIALS_LOCATION_REQUEST_ID = 1;
+        private const int REQUEST_TURN_ON_LOCATION_ID = 2;
+
+        public static bool IsLocationAccessGranted
+        {
+            get => _isLocationAccessGranted;
+            private set
+            {
+                if (_isLocationAccessGranted == value) return;
+                LocationAccessChanged?.Invoke(value);
+                _isLocationAccessGranted = value;
+            }
+        }
+
+        public static bool IsLocationEnabled
+        {
+            get => _isLocationEnabled;
+            private set
+            {
+                if (_isLocationEnabled)return;
+                LocationEnabledChanged?.Invoke(value);
+                _isLocationEnabled = value;
+            }
+        }
+
+        public static event LocationAccessGrantedEventHandler LocationAccessChanged;
+
+        public delegate void LocationAccessGrantedEventHandler(bool value);
+
+        public static event LocationEnabledEventHandler LocationEnabledChanged;
+
+        public delegate void LocationEnabledEventHandler(bool value);
+
         private bool IsScanOpen { get; set; }
 
 
@@ -54,10 +98,9 @@ namespace Cycles.Droid
             Manifest.Permission.AccessFineLocation
         };
 
-        private const int REQUEST_LOCATION_ID = 0;
-        private App app;
+        private App _app;
 
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Popup.Init(this, savedInstanceState);
@@ -65,19 +108,22 @@ namespace Cycles.Droid
             Platform.Init(this, savedInstanceState);
             FormsMaps.Init(this, savedInstanceState);
 
-            if (app == null)
+            if (_app == null)
             {
-                app = new App();
+                _app = new App();
             }
+
             var dm = new DisplayMetrics();
             var windowManager = GetSystemService(WindowService).JavaCast<IWindowManager>();
 
             windowManager.DefaultDisplay.GetRealMetrics(dm);
-            App.ScreenHeight = (int)Math.Ceiling(dm.Ydpi);
-            App.ScreenWidth = (int)Math.Ceiling(dm.Xdpi);
+            App.ScreenHeight = (int) Math.Ceiling(dm.Ydpi);
+            App.ScreenWidth = (int) Math.Ceiling(dm.Xdpi);
             App.ScreenDensity = dm.Density;
+            CheckPermissions();
+            await CheckLocationEnabled();
 
-            LoadApplication(app);
+            LoadApplication(_app);
         }
 
         protected override void OnStart()
@@ -87,10 +133,7 @@ namespace Cycles.Droid
             AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
 
             AlertDialog = new AlertDialog.Builder(this);
-            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", (mapPage) =>
-            {
-                IsScanOpen = true;
-            });
+            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", (mapPage) => { IsScanOpen = true; });
             MessagingCenter.Subscribe<MapPageRenderer>(this, "Remove Lockscreen", (mapPage) =>
             {
                 if (Build.VERSION.SdkInt >= BuildVersionCodes.OMr1)
@@ -105,122 +148,186 @@ namespace Cycles.Droid
                     Window.AddFlags(WindowManagerFlags.KeepScreenOn);
                     Window.AddFlags(WindowManagerFlags.AllowLockWhileScreenOn);
                 }
-
             });
-            MessagingCenter.Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker, string>(this, "Barcode Scanned", (main, s) =>
-            {
-                Device.BeginInvokeOnMainThread(() =>
+            MessagingCenter
+                .Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker, string>(this, "Barcode Scanned", (main, s) =>
                 {
-                    AlertDialog.SetTitle("Start Ride");
-                    AlertDialog.SetMessage("To start ride click Unlock. You are on PAYG");
-                    AlertDialog.SetPositiveButton("Unlock", (senderAlert, args) =>
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        Toast.MakeText(this, "Bike Unlocking", ToastLength.Short).Show();
-                        //NativeController.getReadDataUUID();
-                    });
+                        AlertDialog.SetTitle("Start Ride");
+                        AlertDialog.SetMessage("To start ride click Unlock. You are on PAYG");
+                        AlertDialog.SetPositiveButton("Unlock", (senderAlert, args) =>
+                        {
+                            Toast.MakeText(this, "Bike Unlocking", ToastLength.Short).Show();
+                            //NativeController.getReadDataUUID();
+                        });
 
-                    AlertDialog.SetNegativeButton("Cancel", (senderAlert, args) =>
-                    {
-                        Toast.MakeText(this, "Ride Cancelled!", ToastLength.Short).Show();
-                    });
+                        AlertDialog.SetNegativeButton("Cancel",
+                            (senderAlert, args) =>
+                            {
+                                Toast.MakeText(this, "Ride Cancelled!", ToastLength.Short).Show();
+                            });
 
-                    Dialog dialog = AlertDialog.Create();
-                    dialog.Show();
+                        Dialog dialog = AlertDialog.Create();
+                        dialog.Show();
+                    });
                 });
-
-            });
-
         }
 
-        private async Task CheckLocation(Activity currentActivity)
+        private async Task CheckLocationEnabled()
         {
             try
             {
-                GoogleApiClient
-                    googleApiClient = new GoogleApiClient.Builder(this)
-                        .AddApi(LocationServices.API)
-                        .Build();
-
-                googleApiClient.Connect();
+                LocationRequest
+                    highAccuracyRequest = LocationRequest.Create()
+                        .SetPriority(LocationRequest.PriorityHighAccuracy)
+                        .SetInterval(HIGH_ACC_INTERVAL_IN_MILLISECONDS)
+                        .SetFastestInterval(FASTEST_HIGH_ACC_UPDATE_INTERVAL);
 
                 LocationRequest
-                    locationRequest = LocationRequest.Create()
-                        .SetPriority(LocationRequest.PriorityHighAccuracy)
-                        .SetInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
-                        .SetFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+                    balancedRequest = LocationRequest.Create()
+                        .SetPriority(LocationRequest.PriorityBalancedPowerAccuracy)
+                        .SetInterval(BAL_ACC_INTERVAL_IN_MILLISECONDS)
+                        .SetFastestInterval(FASTEST_BAL_ACC_UPDATE_INTERVAL);
 
                 LocationSettingsRequest.Builder locationSettingsRequestBuilder =
-                    new LocationSettingsRequest.Builder().AddLocationRequest(locationRequest);
+                    new LocationSettingsRequest.Builder()
+                        .AddLocationRequest(highAccuracyRequest)
+                        .AddLocationRequest(balancedRequest)
+                        .SetAlwaysShow(true);
 
-                locationSettingsRequestBuilder.SetAlwaysShow(true);
+                LocationSettingsResponse locationSettingsResult =
+                    await LocationServices.GetSettingsClient(this)
+                        .CheckLocationSettingsAsync(locationSettingsRequestBuilder.Build());
 
-                LocationSettingsResult locationSettingsResult =
-                    await LocationServices.SettingsApi.CheckLocationSettingsAsync(googleApiClient, locationSettingsRequestBuilder.Build());
-
-                if (locationSettingsResult.Status.StatusCode == CommonStatusCodes.ResolutionRequired)
+                if (locationSettingsResult.LocationSettingsStates.IsLocationPresent &&
+                    locationSettingsResult.LocationSettingsStates.IsLocationUsable)
                 {
-                    locationSettingsResult.Status.StartResolutionForResult(currentActivity, 0);
+                    IsLocationEnabled = true;
+                }
+            }
+            catch (ApiException exception)
+            {
+                if (exception.StatusCode != CommonStatusCodes.ResolutionRequired)
+                {
+                    if (exception.StatusCode == LocationSettingsStatusCodes.SettingsChangeUnavailable)
+                    {
+//                        GetLocationPermissions(Manifest.Permission.AccessFineLocation);
+                    }
+                }
+                else
+                {
+                    //  Location settings are not satisfied. But could be fixed by showing the
+                    //  user a dialog.
+                    try
+                    {
+                        var resolvable = exception as ResolvableApiException;
+                        resolvable?.StartResolutionForResult(this, REQUEST_TURN_ON_LOCATION_ID);
+                    }
+                    catch (IntentSender.SendIntentException)
+                    {
+                        //  Ignore the error.
+                    }
+                    catch (ClassCastException)
+                    {
+                        //  Ignore, should be an impossible error.
+                    }
                 }
             }
             catch (Exception e)
             {
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(e));
-                // Log exception
+                Crashlytics.Crashlytics.LogException(Throwable.FromException(e));
             }
         }
 
         private void CheckCamera()
         {
-            CameraManager manager = (CameraManager)GetSystemService(CameraService);
+            CameraManager manager = (CameraManager) GetSystemService(CameraService);
         }
 
         private void CheckPermissions()
         {
             foreach (var permission in LocationPermissions)
             {
-                bool isGranted = ContextCompat.CheckSelfPermission(this, permission) != (int)Permission.Granted;
-                if (isGranted)
-                {
-                    if (ActivityCompat.ShouldShowRequestPermissionRationale(this, permission))
-                    {
-                        Android.Views.View layout = FindViewById(Android.Resource.Id.Content);
-                        Snackbar snackbar = Snackbar
-                            .Make(layout, "This app needs Location access to work properly", Snackbar.LengthIndefinite)
-                            .SetAction("Allow", v => ActivityCompat.RequestPermissions(this, LocationPermissions, REQUEST_LOCATION_ID))
-                            .SetActionTextColor(ContextCompat.GetColorStateList(this, Resource.Color.permission_snackbar_button));
-                        snackbar.View.SetBackgroundResource(Resource.Color.cyclesBlack);
-                        //snackbar.View
-                        ((FrameLayout.LayoutParams)snackbar.View.LayoutParameters).SetMargins(16, 16, 16, 16);
-                        snackbar.Show();
-                    }
-                    else
-                    {
-                        RequestPermissions(LocationPermissions, REQUEST_LOCATION_ID);
-                    }
-                }
+                IsLocationAccessGranted =
+                    ContextCompat.CheckSelfPermission(this, permission) == (int) Permission.Granted;
+                if (IsLocationAccessGranted) continue;
+                GetLocationPermissions(permission);
+                break;
             }
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        private void GetLocationPermissions(string permission)
+        {
+            if (ActivityCompat.ShouldShowRequestPermissionRationale(this, permission))
+            {
+                Android.Views.View layout = FindViewById(Android.Resource.Id.Content);
+                Snackbar snackbar = Snackbar
+                    .Make(layout, "To automatically find your community, grant us location access",
+                        Snackbar.LengthIndefinite)
+                    .SetAction("Allow",
+                        v => ActivityCompat.RequestPermissions(this, LocationPermissions, REQUEST_LOCATION_ID))
+                    .SetActionTextColor(
+                        ContextCompat.GetColorStateList(this, Resource.Color.permission_snackbar_button));
+                snackbar.View.SetBackgroundResource(Resource.Drawable.rounded_bg_r4);
+                snackbar.View.BackgroundTintList = ContextCompat.GetColorStateList(this, Resource.Color.cyclesBlue);
+                ((FrameLayout.LayoutParams) snackbar.View.LayoutParameters).SetMargins(16, 16, 16, 16);
+                snackbar.Show();
+            }
+            else
+            {
+                RequestPermissions(LocationPermissions, REQUEST_LOCATION_ID);
+            }
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             switch (requestCode)
             {
-                case REQUEST_CAMERA_ID:
-                {
-                    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                case REQUEST_TURN_ON_LOCATION_ID:
+                    switch (resultCode)
                     {
-                        IsScanOpen = true;
-                        MessagingCenter.Send(this, "Scanner Opened");
+                        case Result.Ok:
+                            IsLocationEnabled = true;
+                            break;
+                        case Result.Canceled:
+                            IsLocationEnabled = false;
+                            break;
+                        case Result.FirstUser:
+                            IsLocationEnabled = false;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(resultCode), resultCode, null);
                     }
-                    else
-                    {
-                    }
+
                     break;
-                }
+                default:
+                    base.OnActivityResult(requestCode, resultCode, data);
+                    break;
             }
         }
 
-        public async override void OnBackPressed()
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions,
+            [GeneratedEnum] Permission[] grantResults)
+        {
+            switch (requestCode)
+            {
+                case REQUEST_CAMERA_ID when grantResults.Length > 0 && grantResults[0] == Permission.Granted:
+                    IsScanOpen = true;
+                    MessagingCenter.Send(this, "Scanner Opened");
+                    break;
+                case ESSENTIALS_LOCATION_REQUEST_ID when grantResults.Length > 0:
+                    break;
+                case REQUEST_LOCATION_ID when grantResults.Length > 0:
+                    foreach (Permission result in grantResults) IsLocationAccessGranted = result == Permission.Granted;
+                    break;
+                default:
+                    base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+                    break;
+            }
+        }
+
+        public override async void OnBackPressed()
         {
             if (Popup.SendBackPressed(base.OnBackPressed))
             {
@@ -233,7 +340,6 @@ namespace Cycles.Droid
                 IsScanOpen = false;
                 MessagingCenter.Send(this, "Close Scanner");
             }
-
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)

@@ -7,7 +7,7 @@ using Xamarin.Forms.Xaml;
 namespace Cycles.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RootPage : MasterDetailPage
+    public partial class RootPage
     {
         public RootPage()
         {

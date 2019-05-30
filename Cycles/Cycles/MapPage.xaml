@@ -15,7 +15,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ProgressBar x:Name="progressBar"
+        <ProgressBar x:Name="MProgressBar"
+                     x:FieldModifier="public"
                      Grid.Row="0"
                      Grid.Column="0"
                      Grid.ColumnSpan="2"
@@ -24,7 +25,8 @@
                      ProgressColor="{StaticResource EntryBGColorNormalRed}"
                      VerticalOptions="Center" />
         <!--  Place new controls here  -->
-        <views:CyclesMap x:Name="map"
+        <views:CyclesMap x:Name="MMap"
+                         x:FieldModifier="public"
                          Grid.Row="0"
                          Grid.Column="0"
                          Grid.ColumnSpan="2"

@@ -8,7 +8,7 @@ using Xamarin.Forms.Maps;
 
 namespace Cycles.Views
 {
-    class CyclesMap : Map
+    public class CyclesMap : Map
     {
         public List<Position> RouteCoordinates { get; set; }
         public List<LatLng> Lines { get; set; }
@@ -37,9 +37,9 @@ namespace Cycles.Views
             }
         }
 
-        public void LoadRoutes(OverviewPolyline overview_polyline)
+        public void LoadRoutes(OverviewPolyline overviewPolyline)
         {
-            foreach (LatLng line in DirectionsMethods.DecodePolyline(overview_polyline.points))
+            foreach (LatLng line in DirectionsMethods.DecodePolyline(overviewPolyline.points))
             {
                 Lines.Add(line);
             }
