@@ -14,21 +14,24 @@ using Xamarin.Forms.Xaml;
 namespace Cycles.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RootPageMaster : ContentPage
+    public partial class RootPageMaster
     {
-        public ListView ListView;
+//        public ListView ListView;
 
         public RootPageMaster()
         {
             InitializeComponent();
 
-            BindingContext = new RootPageMasterViewModel();
-            ListView = MenuItemsListView;
+            RootMasterViewModel = new RootPageMasterViewModel();
+            BindingContext = RootMasterViewModel;
+//            ListView = MenuItemsListView;
         }
+
+        public static RootPageMasterViewModel RootMasterViewModel { get; private set; }
 
         public class RootPageMasterViewModel : INotifyPropertyChanged
         {
-            public ObservableCollection<RootPageMenuItem> MenuItems { get; set; }
+            public ObservableCollection<RootPageMenuItem> MenuItems { get; }
 
             public RootPageMasterViewModel()
             {
@@ -48,10 +51,7 @@ namespace Cycles.Views
             public event PropertyChangedEventHandler PropertyChanged;
             void OnPropertyChanged([CallerMemberName] string propertyName = "")
             {
-                if (PropertyChanged == null)
-                    return;
-
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
             #endregion
         }

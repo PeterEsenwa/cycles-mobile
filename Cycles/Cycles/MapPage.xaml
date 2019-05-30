@@ -33,7 +33,7 @@
                          HasZoomEnabled="True"
                          HorizontalOptions="FillAndExpand"
                          IsShowingUser="False"
-                         IsVisible="False"
+                         IsVisible="True"
                          MapType="Street"
                          VerticalOptions="Fill" />
         <!--<views:SizedButton Grid.Row="0"
