@@ -30,21 +30,17 @@ namespace Cycles.Droid.Renderers
                 LayoutParameters = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent)
             };
 
-            _androidAppBarLayout = new AppBarLayout(Context)
-            {
-                LayoutParameters = new LinearLayout.LayoutParams(LayoutParams.MatchParent, (int)toolbarHeight)
-            };
+            _androidAppBarLayout = (AppBarLayout)LayoutInflater.FromContext(context).Inflate(Resource.Layout.Toolbar, null);
 
-            toolbar = (Toolbar)LayoutInflater.FromContext(context).Inflate(Resource.Layout.Toolbar, null);
-            toolbar.FindViewById<TextView>(Resource.Id.cycles_text).Gravity = GravityFlags.Left | GravityFlags.CenterVertical;
+            toolbar = (Toolbar)_androidAppBarLayout.FindViewById(Resource.Id.toolbar);
             toolbar.FindViewById<TextView>(Resource.Id.cycles_text).Text = "How To Cycle";
             toolbar.FindViewById<Android.Widget.ImageButton>(Resource.Id.gift_button).Visibility = ViewStates.Invisible;
-            _androidAppBarLayout.AddView(toolbar);
-
-            ((AppBarLayout.LayoutParams)toolbar.LayoutParameters).Height = LayoutParams.WrapContent;
-            ((AppBarLayout.LayoutParams)toolbar.LayoutParameters).Width = LayoutParams.MatchParent;
 
             _androidLinearLayout.AddView(_androidAppBarLayout);
+
+            _androidAppBarLayout.LayoutParameters =
+                new LinearLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.WrapContent);
+
             AddView(_androidLinearLayout);
 
             mainActivity.SetSupportActionBar(toolbar);
@@ -56,15 +52,18 @@ namespace Cycles.Droid.Renderers
             actionBar.SetDisplayShowTitleEnabled(false);
         }
 
-        public override void AddView(Android.Views.View child)
+        public sealed override void AddView(Android.Views.View child)
         {
-            base.AddView(child);
             if (!(child is LinearLayout))
             {
                 child.RemoveFromParent();
                 _androidLinearLayout.AddView(child);
                 child.LayoutParameters = new LinearLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
                 webView = child;
+            }
+            else
+            {
+                base.AddView(child);
             }
         }
 
