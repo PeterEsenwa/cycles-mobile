@@ -20,12 +20,28 @@ namespace Cycles
         private const double LAGOS_LATITUDE = 6.5244;
         private const double LAGOS_LONGITUDE = 3.3792;
         private static readonly string TAG = typeof(MainActivity).FullName;
+        public bool AlreadyLoaded { get; set; }
 
         public MapPage()
         {
             try
             {
                 InitializeComponent();
+                if (AlreadyLoaded)
+                {
+                    MProgressBar.IsVisible = false;
+                }
+                else
+                {
+                    MMap.IsVisible = false;
+                    Device.StartTimer(TimeSpan.FromSeconds(.5), () =>
+                    {
+                        if (!(MProgressBar.Progress < 1)) return false;
+                        Device.BeginInvokeOnMainThread(() =>
+                            MProgressBar.ProgressTo(MProgressBar.Progress + 0.005, 500, Easing.Linear));
+                        return true;
+                    });
+                }
 #if __ANDROID__
                 NavigationPage.SetHasNavigationBar(this, false);
 #endif
@@ -38,13 +54,6 @@ namespace Cycles
                 };
                 NavigationPage.SetTitleView(this, NavStack);
 #endif
-                Device.StartTimer(TimeSpan.FromSeconds(.5), () =>
-                {
-                    if (!(MProgressBar.Progress < 1)) return false;
-                    Device.BeginInvokeOnMainThread(() =>
-                        MProgressBar.ProgressTo(MProgressBar.Progress + 0.005, 500, Easing.Linear));
-                    return true;
-                });
             }
             catch (Exception ex)
             {
@@ -104,6 +113,8 @@ namespace Cycles
         protected override async void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
+            if (AlreadyLoaded) return;
+            AlreadyLoaded = true;
             await PrepareMap();
         }
 
