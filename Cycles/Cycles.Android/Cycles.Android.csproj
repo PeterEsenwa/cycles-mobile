@@ -199,6 +199,7 @@
     <Compile Include="Effects\ShadowEffectDroid.cs" />
     <Compile Include="Effects\ToolbarEffectDroid.cs" />
     <Compile Include="EmailSignUpFragment.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Utils\EmailTextWatcher.cs" />
     <Compile Include="Utils\EnumExtension.cs" />
     <Compile Include="LoginActivity.cs" />

@@ -13,7 +13,7 @@ namespace Cycles
 
         public static int ScreenWidth { get; set; }
 
-        public static RootPage rootPage;
+        private static RootPage rootPage;
 
         public static float ScreenDensity { get; internal set; }
 

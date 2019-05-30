@@ -4,6 +4,7 @@ using Cycles.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Cycles.Droid;
@@ -14,9 +15,11 @@ using NetworkAccess = Xamarin.Essentials.NetworkAccess;
 
 namespace Cycles
 {
-    public partial class MapPage : ContentPage
+    public partial class MapPage
     {
-        private static readonly string TAG = typeof(Droid.MainActivity).FullName;
+        private const double LAGOS_LATITUDE = 6.5244;
+        private const double LAGOS_LONGITUDE = 3.3792;
+        private static readonly string TAG = typeof(MainActivity).FullName;
 
         public MapPage()
         {
@@ -37,14 +40,11 @@ namespace Cycles
 #endif
                 Device.StartTimer(TimeSpan.FromSeconds(.5), () =>
                 {
-                    if (progressBar.Progress < 1)
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                            progressBar.ProgressTo(progressBar.Progress + 0.005, 500, Easing.Linear));
-                        return true;
-                    }
+                    if (!(MProgressBar.Progress < 1)) return false;
+                    Device.BeginInvokeOnMainThread(() =>
+                        MProgressBar.ProgressTo(MProgressBar.Progress + 0.005, 500, Easing.Linear));
+                    return true;
 
-                    return false;
                 });
             }
             catch (Exception ex)
@@ -55,27 +55,27 @@ namespace Cycles
 
             BindingContext = this;
 
-            CustomPin pin = new CustomPin
+            var pin = new CustomPin
             {
                 Type = PinType.Place,
                 PinType = CustomPin.CustomType.Park,
                 Position = new Position(6.672219, 3.161639),
                 Label = "Cycles Point @Cafe 2",
                 Address = "Cafeteria 2, Goodness Rd, Canaan Land, Ota",
-                Id = "P2"
+                MarkerId = "P2"
             };
-            CustomPin pin2 = new CustomPin
+            var pin2 = new CustomPin
             {
                 Type = PinType.Place,
                 PinType = CustomPin.CustomType.Park,
                 Position = new Position(6.67369, 3.15922),
                 Label = "Cycles Point @CST",
                 Address = "College of Science and Tech, CU, Canaan Land, Ota",
-                Id = "P3"
+                MarkerId = "P3"
             };
-            map.CustomPins = new List<CustomPin> { pin, pin2 };
-            map.Pins.Add(pin);
-            map.Pins.Add(pin2);
+            MMap.CustomPins = new List<CustomPin> {pin, pin2};
+            MMap.Pins.Add(pin);
+            MMap.Pins.Add(pin2);
 
             MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", async (mapPage) =>
             {
@@ -94,13 +94,14 @@ namespace Cycles
                     await Navigation.PopModalAsync();
                 }
             });
-            MessagingCenter.Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker>(this, "Close Scanner", async (sender) =>
-            {
-                if (Navigation.ModalStack.Count > 0)
+            MessagingCenter.Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker>(this, "Close Scanner",
+                async (sender) =>
                 {
-                    await Navigation.PopModalAsync(); 
-                }
-            });
+                    if (Navigation.ModalStack.Count > 0)
+                    {
+                        await Navigation.PopModalAsync();
+                    }
+                });
         }
 
         protected override async void OnSizeAllocated(double width, double height)
@@ -117,69 +118,66 @@ namespace Cycles
         {
             try
             {
-                GeolocationRequest request =
-                    new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(45));
-
-
-                Location location = await Geolocation.GetLocationAsync(request);
-                Debug.WriteLine(location?.ToString() ??
-                                "no location**********************************************************************************************");
-
-                if (location != null)
+                if (MainActivity.IsLocationAccessGranted && MainActivity.IsLocationEnabled)
                 {
-                    await progressBar.ProgressTo(1, 250, Easing.CubicInOut);
-                    progressBar.IsVisible = false;
-                    map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(location.Latitude, location.Longitude),
-                        Distance.FromKilometers(.1)));
-                    map.IsVisible = true;
-                }
-                else
-                {
-                    bool retry = await DisplayAlert("Network Issue",
-                        "We couldn't get your location. Please check your network", "RETRY", "USE LAST KNOWN");
-                    if (retry)
+                    var request =
+                        new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(45));
+                    Location location = await Geolocation.GetLocationAsync(request);
+
+                    await MProgressBar.ProgressTo(1, 250, Easing.CubicInOut);
+                    MProgressBar.IsVisible = false;
+                    if (location != null && !location.IsFromMockProvider)
                     {
-                        await PrepareMap();
+                        MMap.MoveToRegion(MapSpan.FromCenterAndRadius(
+                            new Position(location.Latitude, location.Longitude),
+                            Distance.FromKilometers(.1)));
                     }
                     else
                     {
-                        location = await Geolocation.GetLastKnownLocationAsync();
-                        if (location != null)
-                        {
-                            await progressBar.ProgressTo(1, 250, Easing.CubicInOut);
-                            progressBar.IsVisible = false;
-                            map.MoveToRegion(MapSpan.FromCenterAndRadius(
-                                new Position(location.Latitude, location.Longitude),
-                                Distance.FromKilometers(.1)));
-                            map.IsVisible = true;
-                        }
-                        else
-                        {
-                            await PrepareMap();
-                        }
+                        MMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(LAGOS_LATITUDE, LAGOS_LONGITUDE),
+                            Distance.FromKilometers(.1)));
                     }
+
+                    MMap.IsVisible = true;
+                    MMap.IsShowingUser = true;
+                }
+                else
+                {
+                    //Location location = await Geolocation.GetLastKnownLocationAsync();
+                    await MProgressBar.ProgressTo(1, 250, Easing.CubicInOut);
+                    MProgressBar.IsVisible = false;
+                    MMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(LAGOS_LATITUDE, LAGOS_LONGITUDE),
+                        Distance.FromKilometers(10)));
+                    MMap.IsVisible = true;
+                    MMap.IsShowingUser = false;
                 }
             }
             catch (FeatureNotSupportedException fnsEx)
             {
-                bool action = await DisplayAlert("Something went wrong", "You need to allow Location access to the app",
-                    "Go", "Close app");
+                var action = await DisplayAlert("Location not supported",
+                    "It seems you phone does not support Location services",
+                    "Use USSD", "Close app");
+                if (action)
+                {
+                }
+
                 Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(fnsEx));
-                // Handle not supported on device exception
             }
             catch (PermissionException pEx)
             {
-                bool action = await DisplayAlert("Alert", "You need to allow Location access to the app", "Go",
+                var action = await DisplayAlert("Location access error",
+                    "You need to allow Location access the bike share services", "Go",
                     "Close app");
                 Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(pEx));
-                // Handle permission exception
             }
-            catch (Exception ex)
+            catch (FeatureNotEnabledException ex)
             {
-                bool action = await DisplayAlert("Unknown", "You need to allow Location access to the app", "Go",
+                bool action = await DisplayAlert("Location is off", "Please turn on Location access to the app", "Go",
                     "Close app");
                 Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
-                // Unable to get location
+            }
+            catch (Exception)
+            {
             }
         }
 
@@ -194,7 +192,7 @@ namespace Cycles
                 double shortestDistance = 0;
                 Models.Directions directions = new Models.Directions();
                 Location neareatPark = new Location();
-                foreach (Pin pin in map.Pins)
+                foreach (Pin pin in MMap.Pins)
                 {
                     Location endLocation = new Location(pin.Position.Latitude, pin.Position.Longitude);
                     Models.Directions tempDirections = await DirectionsMethods.GetDirectionsInfo(startLocation.Latitude,
@@ -222,14 +220,14 @@ namespace Cycles
                 //}
                 foreach (Models.Route route in directions.Routes)
                 {
-                    map.LoadRoutes(route.overview_polyline);
+                    MMap.LoadRoutes(route.overview_polyline);
                 }
             }
         }
 
         public void StartRide_Clicked(object sender, EventArgs e)
         {
-            SizedButton rideBtn = ((SizedButton)sender);
+            SizedButton rideBtn = ((SizedButton) sender);
             if (!IsRideOngoing)
             {
                 IsRideOngoing = true;
@@ -254,7 +252,7 @@ namespace Cycles
                             return true;
                         }
 
-                        rideBtn.Image = (FileImageSource)TempImage.Source;
+                        rideBtn.Image = (FileImageSource) TempImage.Source;
                         return false;
                     });
                 });

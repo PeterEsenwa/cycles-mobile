@@ -398,7 +398,7 @@ namespace Cycles.Droid
             {
                 ProgressBar progressBar = FindViewById<ProgressBar>(Resource.Id.indeterminateBar);
                 progressBar.Visibility = ViewStates.Visible;
-                //progressBar.StartAnimation();
+                //MProgressBar.StartAnimation();
             }
             else
             {

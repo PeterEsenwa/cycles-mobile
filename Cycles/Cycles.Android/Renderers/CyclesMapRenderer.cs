@@ -99,7 +99,6 @@ namespace Cycles.Droid.Renderers
 
             base.OnMapReady(map);
             nativeMap = NativeMap;
-            nativeMap.MyLocationEnabled = false;
             nativeMap.UiSettings.ZoomControlsEnabled = false;
             nativeMap.UiSettings.MyLocationButtonEnabled = false;
         }

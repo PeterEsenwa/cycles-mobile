@@ -26,7 +26,6 @@ using System;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-
 using static Android.Support.Design.Widget.AppBarLayout.LayoutParams;
 using AView = Android.Views.View;
 using Button = Android.Widget.Button;
@@ -37,13 +36,14 @@ using ImageButton = Android.Widget.ImageButton;
 
 namespace Cycles.Droid.Renderers
 {
-    public class MapPageRenderer : PageRenderer, GoogleApiClient.IConnectionCallbacks,
+    public sealed class MapPageRenderer : PageRenderer, GoogleApiClient.IConnectionCallbacks,
         GoogleApiClient.IOnConnectionFailedListener, Android.Gms.Location.ILocationListener
     {
         private const string TAG = "location-settings";
-        protected const int RequestCheckSettings = 0x1;
+        private const int RequestCheckSettings = 0x1;
 
         public static bool IsReload { get; set; }
+
         private CoordinatorLayout AndroidCoordinatorLayout { get; set; }
         //private AppBarLayout AndroidAppBarLayout { get; set; }
 
@@ -61,32 +61,32 @@ namespace Cycles.Droid.Renderers
         private LocationRequest mLocationRequest;
         //private LocationSettingsRequest mLocationSettingsRequest;
 
-        FusedLocationProviderClient fusedLocationProviderClient;
+        private FusedLocationProviderClient fusedLocationProviderClient { get; set; }
 
         private static CyclesMapRenderer MyMapView { get; set; }
         private const long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
         private const long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
         //private MapPage MapPage { get; set; }
-        public MainActivity mainActivity { get; private set; }
-        private const int REQUEST_CAMERA_ID  = 10;
+        private MainActivity MainActivity { get; }
+        private const int REQUEST_CAMERA_ID = 10;
 
         public MapPageRenderer(Context context) : base(context)
         {
-            mainActivity = (Context as MainActivity);
+            MainActivity = (Context as MainActivity);
 
             //MessagingCenter.Subscribe<MainActivity>(this, "Close Scanner",
             //    (sender) => { Application.Current.MainPage = MapPage; });
-            fusedLocationProviderClient = LocationServices.GetFusedLocationProviderClient(mainActivity);
+            fusedLocationProviderClient = LocationServices.GetFusedLocationProviderClient(MainActivity);
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
-                if (mainActivity?.Window != null)
+                if (MainActivity?.Window != null)
                 {
-                    AView decorView = mainActivity.Window.DecorView;
+                    AView decorView = MainActivity.Window.DecorView;
                     decorView.SetFitsSystemWindows(false);
 
-                    mainActivity.Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
+                    MainActivity.Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
                 }
             }
 
@@ -99,51 +99,57 @@ namespace Cycles.Droid.Renderers
 
             #region Initialize _androidCoordinatorLayout with LayoutParams
 
-            AndroidCoordinatorLayout = (CoordinatorLayout)LayoutInflater.FromContext(Context)
+            AndroidCoordinatorLayout = (CoordinatorLayout) LayoutInflater.FromContext(Context)
                 .Inflate(Resource.Layout.MapWithCoordinator, null);
             AndroidCoordinatorLayout.SetBackgroundColor(Color.Transparent.ToAndroid());
+
             var scanBarcode = AndroidCoordinatorLayout.FindViewById<Button>(Resource.Id.scan_barcode);
 
-            var closestBikeFab = AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_closest_bicycle);
+            var closestBikeFab =
+                AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_closest_bicycle);
+
+            var refreshMapFab =
+                AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_refresh_map);
+
             var locateMeFab = AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_locate_me);
-            var refreshMapFab = AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_refresh_map);
-            if (closestBikeFab != null)
+
+            if (!MainActivity.IsLocationAccessGranted || !MainActivity.IsLocationEnabled)
             {
-                closestBikeFab.Click += FindClosestBike;
+                if (scanBarcode != null) scanBarcode.Visibility = ViewStates.Gone;
+                locateMeFab?.SetVisibility(ViewStates.Gone);
+                refreshMapFab?.SetVisibility(ViewStates.Gone);
+                closestBikeFab?.SetVisibility(ViewStates.Gone);
             }
 
-            if (scanBarcode != null)
-            {
-                scanBarcode.Click += ScanBarcode_Click;
-            }
+            if (closestBikeFab != null) closestBikeFab.Click += FindClosestBike;
 
-            if (locateMeFab != null)
-            {
-                locateMeFab.Click += LocateMe;
-            }
+            if (scanBarcode != null) scanBarcode.Click += ScanBarcode_Click;
 
-            if (refreshMapFab != null)
-            {
-                refreshMapFab.Click += RefreshMap;
-            }
+            if (locateMeFab != null) locateMeFab.Click += LocateMe;
+
+            if (refreshMapFab != null) refreshMapFab.Click += RefreshMap;
+
+            MainActivity.LocationAccessChanged += MainActivity_LocationAccessChanged;
+            MainActivity.LocationEnabledChanged += MainActivity_LocationEnabledChanged;
 
             #endregion
 
             #region Initialize _androidAppBarLayout with LayoutParams
 
             //AndroidAppBarLayout = AndroidCoordinatorLayout.FindViewById<AppBarLayout>(Resource.Id.mappage_appbar);
-            var toolbar = AndroidCoordinatorLayout.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.mappage_toolbar);
+            var toolbar =
+                AndroidCoordinatorLayout.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.mappage_toolbar);
 
             var giftButton = toolbar.FindViewById<ImageButton>(Resource.Id.gift_button);
             giftButton.Click += GiftButton_Click;
 
             if (toolbar.LayoutParameters != null)
             {
-                ((AppBarLayout.LayoutParams)toolbar.LayoutParameters).ScrollFlags = ScrollFlagEnterAlways;
+                ((AppBarLayout.LayoutParams) toolbar.LayoutParameters).ScrollFlags = ScrollFlagEnterAlways;
             }
 
-            mainActivity?.SetSupportActionBar(toolbar);
-            ActionBar actionBar = mainActivity?.SupportActionBar;
+            MainActivity?.SetSupportActionBar(toolbar);
+            ActionBar actionBar = MainActivity?.SupportActionBar;
 
             if (actionBar != null)
             {
@@ -157,34 +163,72 @@ namespace Cycles.Droid.Renderers
             AddView(AndroidCoordinatorLayout);
         }
 
+        private void MainActivity_LocationAccessChanged(bool permissionStatus)
+        {
+            var locateMeFab =
+                AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_locate_me);
+            if (MainActivity.IsLocationEnabled && permissionStatus)
+            {
+                locateMeFab?.SetVisibility(ViewStates.Visible);
+                MyMapView.nativeMap.MyLocationEnabled = true;
+                MyMapView.nativeMap.UiSettings.MyLocationButtonEnabled = false;
+            }
+            else
+            {
+                locateMeFab?.SetVisibility(ViewStates.Gone);
+                MyMapView.nativeMap.MyLocationEnabled = false;
+            }
+        }
+
+        private void MainActivity_LocationEnabledChanged(bool settingStatus)
+        {
+            var locateMeFab =
+                AndroidCoordinatorLayout.FindViewById<FloatingActionButton>(Resource.Id.fab_locate_me);
+            if (MainActivity.IsLocationAccessGranted && settingStatus)
+            {
+                locateMeFab?.SetVisibility(ViewStates.Visible);
+                MyMapView.nativeMap.MyLocationEnabled = true;
+                MyMapView.nativeMap.UiSettings.MyLocationButtonEnabled = false;
+            }
+            else
+            {
+                locateMeFab?.SetVisibility(ViewStates.Gone);
+                MyMapView.nativeMap.MyLocationEnabled = false;
+            }
+        }
+
         private void GiftButton_Click(object sender, EventArgs e)
         {
-            PopupNavigation.Instance.PushAsync(new Views.GiftPopup(), true);
+            PopupNavigation.Instance.PushAsync(new Views.GiftPopup());
         }
 
         private void ScanBarcode_Click(object sender, EventArgs e)
         {
-            if (ContextCompat.CheckSelfPermission(mainActivity, Manifest.Permission.Camera) != (int)Permission.Granted)
+            if (ContextCompat.CheckSelfPermission(MainActivity, Manifest.Permission.Camera) != (int) Permission.Granted)
             {
-                if (ActivityCompat.ShouldShowRequestPermissionRationale(mainActivity, Manifest.Permission.Camera))
+                if (ActivityCompat.ShouldShowRequestPermissionRationale(MainActivity, Manifest.Permission.Camera))
                 {
                     AView layout = FindViewById(Android.Resource.Id.Content);
                     Snackbar snackbar = Snackbar
-                        .Make(AndroidCoordinatorLayout, "Allow access to your phone's camera. Swipe right to dismiss", Snackbar.LengthIndefinite)
+                        .Make(AndroidCoordinatorLayout, "Allow access to your phone's camera. Swipe right to dismiss",
+                            Snackbar.LengthIndefinite)
                         .SetAction("Allow", v => RequestCameraPermission())
-                        .SetActionTextColor(ContextCompat.GetColorStateList(Context, Resource.Color.permission_snackbar_button));
+                        .SetActionTextColor(ContextCompat.GetColorStateList(Context,
+                            Resource.Color.permission_snackbar_button));
                     snackbar.View.SetBackgroundResource(Resource.Drawable.rounded_bg_r4);
 
-                    int[][] states = new int[][] {
-                        new int[] { Android.Resource.Attribute.StateEnabled}
+                    int[][] states =
+                    {
+                        new[] {Android.Resource.Attribute.StateEnabled}
                     };
 
-                    int[] colors = new int[] {
-                        mainActivity.GetColor(Resource.Color.cyclesBlueLight)
+                    int[] colors =
+                    {
+                        MainActivity.GetColor(Resource.Color.cyclesBlueLight)
                     };
 
                     snackbar.View.BackgroundTintList = new ColorStateList(states, colors);
-                    ((CoordinatorLayout.LayoutParams)snackbar.View.LayoutParameters).SetMargins(16, 32, 16, 32);
+                    ((CoordinatorLayout.LayoutParams) snackbar.View.LayoutParameters).SetMargins(16, 32, 16, 32);
                     snackbar.Show();
                 }
                 else
@@ -202,7 +246,7 @@ namespace Cycles.Droid.Renderers
         {
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
             {
-                mainActivity.RequestPermissions(new string[] { Manifest.Permission.Camera }, REQUEST_CAMERA_ID);
+                MainActivity.RequestPermissions(new[] {Manifest.Permission.Camera}, REQUEST_CAMERA_ID);
             }
         }
 
@@ -213,6 +257,8 @@ namespace Cycles.Droid.Renderers
 
         private async void LocateMe(object sender, EventArgs e)
         {
+            if (!MainActivity.IsLocationEnabled || !MainActivity.IsLocationAccessGranted) return;
+
             Location location = await fusedLocationProviderClient.GetLastLocationAsync();
             var latLng = new LatLng(location.Latitude, location.Longitude);
             CameraPosition.Builder builder = CameraPosition.InvokeBuilder();
@@ -221,7 +267,6 @@ namespace Cycles.Droid.Renderers
             builder.Bearing(location.Bearing);
 
             CameraPosition cameraPosition = builder.Build();
-
             CameraUpdate cameraUpdate = CameraUpdateFactory.NewCameraPosition(cameraPosition);
 
             MyMapView.nativeMap.AnimateCamera(cameraUpdate);
@@ -270,15 +315,13 @@ namespace Cycles.Droid.Renderers
                 return true;
             }
 
-            if (GoogleApiAvailability.Instance.IsUserResolvableError(queryResult))
-            {
-                // Check if there is a way the user can resolve the issue
-                var errorString = GoogleApiAvailability.Instance.GetErrorString(queryResult);
-                Log.Error("MainActivity", "There is a problem with Google Play Services on this device: {0} - {1}",
-                    queryResult, errorString);
+            if (!GoogleApiAvailability.Instance.IsUserResolvableError(queryResult)) return false;
+            // Check if there is a way the user can resolve the issue
+            var errorString = GoogleApiAvailability.Instance.GetErrorString(queryResult);
+            Log.Error("MainActivity", "There is a problem with Google Play Services on this device: {0} - {1}",
+                queryResult, errorString);
 
-                // Alternately, display the error to the user.
-            }
+            // TODO: Alternately, display the error to the user.
 
             return false;
         }
@@ -292,13 +335,12 @@ namespace Cycles.Droid.Renderers
                 if (Element != null) return;
                 MainViewGroup = null;
                 AndroidCoordinatorLayout = null;
-                //AndroidAppBarLayout = null;
-
                 return;
             }
 
             if (e.NewElement != null)
             {
+                
                 MessagingCenter.Send(this, "Remove Lock-screen");
             }
         }
@@ -329,15 +371,16 @@ namespace Cycles.Droid.Renderers
 
         public override void AddView(AView child)
         {
-            child.RemoveFromParent();
             base.AddView(child);
             if (!(child is CoordinatorLayout))
             {
                 child.RemoveFromParent();
-                ((ViewGroup)child).LayoutParameters =
+                ((ViewGroup) child).LayoutParameters =
                     new CoordinatorLayout.LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
-                MainViewGroup = (ViewGroup)child;
-                AndroidCoordinatorLayout.FindViewById<Android.Widget.RelativeLayout>(Resource.Id.map_holder).AddView(child);
+                MainViewGroup = (ViewGroup) child;
+                AndroidCoordinatorLayout.FindViewById<Android.Widget.RelativeLayout>(Resource.Id.map_holder)
+                    .AddView(child);
+
                 for (var i = 0; i < MainViewGroup.ChildCount; i++)
                 {
                     AView foundChild = MainViewGroup.GetChildAt(i);
@@ -345,6 +388,7 @@ namespace Cycles.Droid.Renderers
                     {
                         MyMapView = cyclesMapRenderer;
                     }
+
                     if (IsGooglePlayServicesInstalled())
                     {
                         //await CreateLocationRequest();
@@ -360,14 +404,12 @@ namespace Cycles.Droid.Renderers
         {
             base.OnLayout(changed, l, t, r, b);
 
-            if (AndroidCoordinatorLayout != null)
-            {
-                var msw = MeasureSpec.MakeMeasureSpec(r - l, MeasureSpecMode.Exactly);
-                var msh = MeasureSpec.MakeMeasureSpec(b - t, MeasureSpecMode.Exactly);
+            if (AndroidCoordinatorLayout == null) return;
+            var msw = MeasureSpec.MakeMeasureSpec(r - l, MeasureSpecMode.Exactly);
+            var msh = MeasureSpec.MakeMeasureSpec(b - t, MeasureSpecMode.Exactly);
 
-                AndroidCoordinatorLayout?.Measure(msw, msh);
-                AndroidCoordinatorLayout?.Layout(0, 0, r - l, b - t);
-            }
+            AndroidCoordinatorLayout?.Measure(msw, msh);
+            AndroidCoordinatorLayout?.Layout(0, 0, r - l, b - t);
         }
 
         public void OnConnected(Bundle connectionHint)
@@ -400,7 +442,5 @@ namespace Cycles.Droid.Renderers
                 }
             }
         }
-
-
     }
 }
