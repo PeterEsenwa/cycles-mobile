@@ -22,6 +22,7 @@
                      Grid.ColumnSpan="2"
                      HorizontalOptions="Center"
                      Progress=".05"
+                     IsVisible="False"
                      ProgressColor="{StaticResource EntryBGColorNormalRed}"
                      VerticalOptions="Center" />
         <!--  Place new controls here  -->

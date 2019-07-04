@@ -21,26 +21,30 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <AndroidKeyStore>true</AndroidKeyStore>
-    <AndroidSigningKeyStore>C:\Users\Dell Inspiron 15\AppData\Local\Xamarin\Mono for Android\debug.keystore</AndroidSigningKeyStore>
-    <AndroidSigningStorePass>android</AndroidSigningStorePass>
-    <AndroidSigningKeyPass>android</AndroidSigningKeyPass>
-    <AndroidSigningKeyAlias>androiddebugkey</AndroidSigningKeyAlias>
+    <AndroidSigningKeyStore>C:\Users\Dell Inspiron 15\AppData\Local\Xamarin\Mono for Android\Keystore\cycles_release\cycles_release.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>musicalGrite1</AndroidSigningStorePass>
+    <AndroidSigningKeyPass>musicalGrite1</AndroidSigningKeyPass>
+    <AndroidSigningKeyAlias>cycles_release</AndroidSigningKeyAlias>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
     <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
     <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
+    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <AndroidUseAapt2>false</AndroidUseAapt2>
+    <EnableProguard>false</EnableProguard>
+    <MandroidI18n />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
@@ -60,10 +64,15 @@
     <AndroidSupportedAbis>armeabi-v7a;x86;x86_64;arm64-v8a</AndroidSupportedAbis>
     <AndroidLinkSkip>
     </AndroidLinkSkip>
-    <AndroidLinkMode>Full</AndroidLinkMode>
+    <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <AndroidUseAapt2>true</AndroidUseAapt2>
+    <AndroidDexTool>dx</AndroidDexTool>
+    <AndroidLinkTool>proguard</AndroidLinkTool>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
+    <Reference Include="Mono.Android.Export" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -71,6 +80,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="GeoJSON.Net">
+      <Version>1.1.72</Version>
+    </PackageReference>
     <PackageReference Include="Google.Apis">
       <Version>1.40.0</Version>
     </PackageReference>
@@ -88,6 +100,9 @@
     </PackageReference>
     <PackageReference Include="Rg.Plugins.Popup">
       <Version>1.1.5.180</Version>
+    </PackageReference>
+    <PackageReference Include="System.Collections.NonGeneric">
+      <Version>4.3.0</Version>
     </PackageReference>
     <PackageReference Include="System.Json">
       <Version>4.5.0</Version>
@@ -109,6 +124,9 @@
     </PackageReference>
     <PackageReference Include="Xamarin.Android.Fabric">
       <Version>1.4.3</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Android.Maps.Utils">
+      <Version>0.5.1-beta2</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Android.Support.Annotations">
       <Version>28.0.0.1</Version>
@@ -154,7 +172,7 @@
       <Version>71.1603.0-preview4</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Dynamic.Links">
-      <Version>71.1615.0-preview3</Version>
+      <Version>71.1615.0-preview6</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.ML.Vision">
       <Version>71.1500.0-preview2</Version>
@@ -195,6 +213,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomViews\CameraSourcePreview.cs" />
+    <Compile Include="CustomViews\IndicatorLayout.cs" />
     <Compile Include="CustomViews\IndicatorView.cs" />
     <Compile Include="CustomViews\SearchEditTextLayout.cs" />
     <Compile Include="DependecyImplementations\PermissionHandlerImpl.cs" />
@@ -202,11 +221,20 @@
     <Compile Include="Effects\ShadowEffectDroid.cs" />
     <Compile Include="Effects\ToolbarEffectDroid.cs" />
     <Compile Include="EmailSignUpFragment.cs" />
+    <Compile Include="Services\FetchAddressJobIntentService.cs" />
+    <Compile Include="Utils\Community.cs" />
+    <Compile Include="Utils\LocationSettingsBroadcastsReceiver.cs" />
+    <Compile Include="Utils\MapPageRendererAddressResultReceiver.cs" />
+    <Compile Include="Utils\Communities.cs" />
+    <Compile Include="Utils\RideHandlerServiceConnection.cs" />
+    <Compile Include="Utils\RideHandlerBinder.cs" />
+    <Compile Include="Utils\GraphicBarcodeTracker.cs" />
+    <Compile Include="Utils\GraphicBarcodeTrackerFactory.cs" />
     <Compile Include="Utils\EmailTextWatcher.cs" />
     <Compile Include="Utils\EnumExtension.cs" />
     <Compile Include="LoginActivity.cs" />
     <Compile Include="MainActivity.cs" />
-    <Compile Include="NativeController.cs" />
+    <Compile Include="Utils\NativeController.cs" />
     <Compile Include="Utils\PagesGestureListener.cs" />
     <Compile Include="Utils\PagesGestureRecognizer.cs" />
     <Compile Include="Utils\PhoneAuthVerificationCallbacks.cs" />
@@ -260,6 +288,7 @@
     <AndroidNativeLibrary Include="lib\x86_64\libjimi-native-lib.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </AndroidNativeLibrary>
+    <AndroidAsset Include="Assets\cuPolygon.json" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
     <AndroidResource Include="Resources\animator\appear.xml">
@@ -1292,6 +1321,93 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxhdpi\ic_search_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\rounded_bg_r12.xml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\scan_barcode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\scan_barcode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\scan_barcode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\scan_barcode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\scan_barcode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\scan_barcode_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\scan_barcode_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\scan_barcode_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\scan_barcode_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\scan_barcode_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\refresh_map.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-anydpi\settings_icon.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-anydpi\map_icon.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\map_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\map_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\map_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\map_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-anydpi\my_location.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\my_location.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\my_location.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\my_location.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\my_location.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\dashboard_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\dashboard_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\dashboard_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\dashboard_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-anydpi\dashboard_icon.xml" />
   </ItemGroup>
   <Import Project="..\Cycles\Cycles.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

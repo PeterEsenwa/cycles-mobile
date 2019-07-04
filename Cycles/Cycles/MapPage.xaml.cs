@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Cycles.Droid;
+using Cycles.Droid.Utils;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -33,7 +34,7 @@ namespace Cycles
                 }
                 else
                 {
-                    MMap.IsVisible = false;
+//                    MMap.IsVisible = false;
                     Device.StartTimer(TimeSpan.FromSeconds(.5), () =>
                     {
                         if (!(MProgressBar.Progress < 1)) return false;
@@ -58,7 +59,7 @@ namespace Cycles
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
+//                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
             }
 
             BindingContext = this;
@@ -82,10 +83,11 @@ namespace Cycles
                 MarkerId = "P3"
             };
             MMap.CustomPins = new List<CustomPin> {pin, pin2};
-            MMap.Pins.Add(pin);
-            MMap.Pins.Add(pin2);
+            MMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(LAGOS_LATITUDE, LAGOS_LONGITUDE),new Distance(15000d)));
 
-            MessagingCenter.Subscribe<MainActivity>(this, "Scanner Opened", async (mapPage) =>
+//            MMap.Pins.Add(pin);
+//            MMap.Pins.Add(pin2);
+            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", async (mainActivity) =>
             {
                 var scanPage = new CustomBarcodeScanner();
                 if (Application.Current.MainPage.Navigation.ModalStack.Count == 0)
@@ -100,8 +102,7 @@ namespace Cycles
                     await Application.Current.MainPage.Navigation.PopModalAsync();
                 }
             });
-            MessagingCenter.Subscribe<BarcodeScannerRenderer
-                .GraphicBarcodeTracker>(this, "Close Scanner", async (sender) =>
+            MessagingCenter.Subscribe<GraphicBarcodeTracker>(this, "Close Scanner", async (sender) =>
             {
                 if (Application.Current.MainPage.Navigation.ModalStack.Count > 0)
                 {
@@ -110,55 +111,26 @@ namespace Cycles
             });
         }
 
+        private bool IsRideOngoing { get; set; }
+        private bool IsCalculatingDist { get; set; } = false;
+        private Image TempImage { get; set; } = new Image();
+
         protected override async void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
             if (AlreadyLoaded) return;
             AlreadyLoaded = true;
-            await PrepareMap();
+            await TestLocationRequest();
         }
 
-        private bool IsRideOngoing { get; set; }
-        private bool IsCalculatingDist { get; set; } = false;
-        private Image TempImage { get; set; } = new Image();
-
-        private async Task PrepareMap()
+        private async Task TestLocationRequest()
         {
             try
             {
-                if (MainActivity.IsLocationAccessGranted && MainActivity.IsLocationEnabled)
-                {
-                    var request =
-                        new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(45));
-                    Location location = await Geolocation.GetLocationAsync(request);
+                var request =
+                    new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(15));
+                Location location = await Geolocation.GetLocationAsync(request);
 
-                    await MProgressBar.ProgressTo(1, 250, Easing.CubicInOut);
-                    MProgressBar.IsVisible = false;
-                    if (location != null && !location.IsFromMockProvider)
-                    {
-                        MMap.MoveToRegion(MapSpan.FromCenterAndRadius(
-                            new Position(location.Latitude, location.Longitude),
-                            Distance.FromKilometers(.1)));
-                    }
-                    else
-                    {
-                        MMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(LAGOS_LATITUDE, LAGOS_LONGITUDE),
-                            Distance.FromKilometers(.1)));
-                    }
-
-                    MMap.IsVisible = true;
-                    MMap.IsShowingUser = true;
-                }
-                else
-                {
-                    //Location location = await Geolocation.GetLastKnownLocationAsync();
-                    await MProgressBar.ProgressTo(1, 250, Easing.CubicInOut);
-                    MProgressBar.IsVisible = false;
-                    MMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(LAGOS_LATITUDE, LAGOS_LONGITUDE),
-                        Distance.FromKilometers(10)));
-                    MMap.IsVisible = true;
-                    MMap.IsShowingUser = false;
-                }
             }
             catch (FeatureNotSupportedException fnsEx)
             {
@@ -169,23 +141,24 @@ namespace Cycles
                 {
                 }
 
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(fnsEx));
+//                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(fnsEx));
             }
             catch (PermissionException pEx)
             {
                 var action = await DisplayAlert("Location access error",
                     "You need to allow Location access the bike share services", "Go",
                     "Close app");
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(pEx));
+//                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(pEx));
             }
             catch (FeatureNotEnabledException ex)
             {
                 bool action = await DisplayAlert("Location is off", "Please turn on Location access to the app", "Go",
                     "Close app");
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
+//                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.Message);
             }
         }
 

@@ -8,14 +8,19 @@ using Android.Util;
 using Cycles.Droid.Renderers;
 using System;
 using System.Collections.Generic;
+using Cycles.Droid.Utils;
+
+namespace Cycles.Droid.Utils
+{
+}
 
 namespace Cycles.Droid.Services
 {
-    [Service(Name = "com.Cycles.RideHandlerService")]
+    [Service(Name = "com.cycles.bikeshare.RideService")]
     public class RideHandlerService : Service, IGetTimestamp
     {
         private static readonly string TAG = typeof(RideHandlerService).FullName;
-        public const string RIDE_CHANNEL = "com.Kinesys.Cycles.RideNotification";
+        public const string RIDE_CHANNEL = "com.cycles.bikeshare.RideNotification";
         private UtcTimestamper timestamper;
         private bool isStarted;
         private Handler handler;
@@ -32,7 +37,7 @@ namespace Cycles.Droid.Services
             locationManager = (LocationManager)GetSystemService(LocationService);
             timestamper = new UtcTimestamper();
             handler = new Handler();
-            runnable = new Action(() =>
+            runnable = () =>
             {
                 if (timestamper == null)
                 {
@@ -58,7 +63,7 @@ namespace Cycles.Droid.Services
 
                     handler.PostDelayed(runnable, Constants.DELAY_BETWEEN_LOG_MESSAGES);
                 }
-            });
+            };
         }
 
         public override void OnDestroy()
@@ -143,7 +148,7 @@ namespace Cycles.Droid.Services
             //    .Build();
 
             string chanName = GetString(Resource.String.noti_chan_ride);
-            var importance = NotificationImportance.High;
+            var importance = NotificationImportance.Max;
             NotificationChannel chan = new NotificationChannel(RIDE_CHANNEL, chanName, importance);
             chan.EnableVibration(true);
             chan.LockscreenVisibility = NotificationVisibility.Public;
@@ -202,59 +207,4 @@ namespace Cycles.Droid.Services
             this.mapView = renderer;
         }
     }
-
-    public class RideHandlerBinder : Binder, IGetTimestamp
-    {
-        public RideHandlerService service;
-        public RideHandlerBinder(RideHandlerService service)
-        {
-            this.service = service;
-        }
-
-        public string GetFormattedTimestamp()
-        {
-            return service?.GetFormattedTimestamp();
-        }
-    }
-
-    public class RideHandlerServiceConnection : Java.Lang.Object, IServiceConnection, IGetTimestamp
-    {
-        static readonly string TAG = typeof(RideHandlerServiceConnection).FullName;
-
-        MapPageRenderer Renderer;
-        RideHandlerService rideHandler;
-
-        public RideHandlerServiceConnection(MapPageRenderer renderer)
-        {
-            IsConnected = false;
-            Binder = null;
-            Renderer = renderer;
-        }
-
-        public bool IsConnected { get; private set; }
-        public RideHandlerBinder Binder { get; private set; }
-
-        public string GetFormattedTimestamp()
-        {
-            if (!IsConnected)
-            {
-                return null;
-            }
-
-            return Binder?.GetFormattedTimestamp();
-        }
-
-        public void OnServiceConnected(ComponentName name, IBinder service)
-        {
-            Binder = service as RideHandlerBinder;
-            rideHandler = Binder.service;
-            rideHandler.SetActivity(Renderer);
-        }
-
-        public void OnServiceDisconnected(ComponentName name)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }

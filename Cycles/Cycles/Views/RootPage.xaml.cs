@@ -38,8 +38,7 @@ namespace Cycles.Views
                 IsPresented = false;
             }
 
-
-//            MasterPage.ListView.SelectedItem = null;
+            MasterPage.MenuItemsListView.SelectedItem = null;
         }
 
         private NavigationPage NavDetailPage { get; set; }

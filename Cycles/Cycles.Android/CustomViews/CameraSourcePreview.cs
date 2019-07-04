@@ -120,7 +120,7 @@ namespace Cycles.Droid.CustomViews
                 catch (Exception ex)
                 {
                     Log.Error(TAG, "Could not start camera source.", ex);
-                    Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
+//                    Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
                 }
             }
 

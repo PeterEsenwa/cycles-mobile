@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Android.App;
 using Android.Content;
 using Android.Gms.Vision;
 using Android.Gms.Vision.Barcodes;
@@ -30,24 +29,27 @@ using Android.Support.Design.Widget;
 using Android.Content.PM;
 using Xamarin.Essentials;
 using Android.Hardware;
+using Cycles.Droid.Utils;
+using Java.Lang.Reflect;
+using Camera = Android.Hardware.Camera;
 using ImageButton = Android.Widget.ImageButton;
+using Object = Java.Lang.Object;
 
 [assembly: ExportRenderer(typeof(CustomBarcodeScanner), typeof(BarcodeScannerRenderer))]
 
 namespace Cycles.Droid.Renderers
 {
-    sealed class BarcodeScannerRenderer : PageRenderer
+    internal sealed class BarcodeScannerRenderer : PageRenderer
     {
         private ConstraintLayout MainLayout { get; set; }
-        const string TAG = "BarcodeTracker";
+        private const string TAG = "BarcodeTracker";
         private CameraSource MCameraSource { get; set; }
-        private bool _previouslyScanned { get; set; }
+        internal bool PreviouslyScanned { get; set; }
         private ImageButton CloseScannerButton { get; set; }
         private CameraSourcePreview CameraSourcePreview { get; set; }
         private GraphicOverlay MGraphicOverlay { get; set; }
-        public Android.Hardware.Camera CoreCamera { get; private set; }
-        AlertDialog.Builder alertDialog { get; set; }
-        public bool IsFlashOn { get; set; }
+        private Camera CoreCamera { get; set; }
+        private bool IsFlashOn { get; set; }
         public BarcodeScannerRenderer(Context context) : base(context)
         {
             MainLayout =
@@ -59,7 +61,7 @@ namespace Cycles.Droid.Renderers
             {
                 await Xamarin.Forms.Application.Current.MainPage.Navigation.PopModalAsync();
             };
-            //ControlsBox = MainLayout.FindViewById<Android.Widget.RelativeLayout>(Resource.Id.controls_overlay);
+
             MGraphicOverlay = MainLayout.FindViewById<GraphicOverlay>(Resource.Id.faceOverlay);
 
             BarcodeDetector detector = new BarcodeDetector.Builder(Application.Context)
@@ -104,28 +106,31 @@ namespace Cycles.Droid.Renderers
             {
                 var javaCam = MCameraSource.JavaCast<Java.Lang.Object>();
                 var fields = javaCam.Class.GetDeclaredFields();
-                foreach (var field in fields)
+                foreach (Field field in fields)
                 {
-                    if (field.Type.CanonicalName.Equals("android.hardware.camera", StringComparison.OrdinalIgnoreCase))
-                    {
-                        field.Accessible = true;
-                        var camera = field.Get(javaCam);
-                        CoreCamera = (Android.Hardware.Camera)camera;
-                    }
+                    if (!field.Type.CanonicalName.Equals("android.hardware.camera", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    field.Accessible = true;
+                    Object camera = field.Get(javaCam);
+                    CoreCamera = (Camera)camera;
                 }
             }
 
             if (!IsFlashOn)
             {
-                var prams = CoreCamera.GetParameters();
-                prams.FlashMode = Android.Hardware.Camera.Parameters.FlashModeTorch;
-                CoreCamera.SetParameters(prams);
+                if (CoreCamera != null)
+                {
+                    Camera.Parameters prams = CoreCamera.GetParameters();
+                    prams.FlashMode = Camera.Parameters.FlashModeTorch;
+                    CoreCamera.SetParameters(prams);
+                }
+
                 IsFlashOn = true;
             }
             else
             {
-                var prams = CoreCamera.GetParameters();
-                prams.FlashMode = Android.Hardware.Camera.Parameters.FlashModeOff;
+                Camera.Parameters prams = CoreCamera.GetParameters();
+                prams.FlashMode = Camera.Parameters.FlashModeOff;
                 CoreCamera.SetParameters(prams);
                 IsFlashOn = false;
             }
@@ -137,8 +142,8 @@ namespace Cycles.Droid.Renderers
 
             if (MainLayout != null)
             {
-                int width = r - l;
-                int height = b - t;
+                var width = r - l;
+                var height = b - t;
                 var msw = MeasureSpec.MakeMeasureSpec(width, MeasureSpecMode.Exactly);
                 var msh = MeasureSpec.MakeMeasureSpec(height, MeasureSpecMode.Exactly);
 
@@ -168,87 +173,9 @@ namespace Cycles.Droid.Renderers
                 Android.Util.Log.Error(TAG, "Unable to start camera source.", e);
                 MCameraSource.Release();
                 MGraphicOverlay = null;
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(e));
+//                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(e));
             }
         }
 
-        /**
-         * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
-         * uses this factory to create face trackers as needed -- one for each individual.
-         */
-        private class GraphicBarcodeTrackerFactory : Java.Lang.Object, MultiProcessor.IFactory
-        {
-            BarcodeScannerRenderer parent;
-            public GraphicBarcodeTrackerFactory(GraphicOverlay overlay, BarcodeScannerRenderer parent) : base()
-            {
-                this.parent = parent;
-                Overlay = overlay;
-            }
-
-            private GraphicOverlay Overlay { get; set; }
-
-            public Tracker Create(Java.Lang.Object item)
-            {
-                return new GraphicBarcodeTracker(parent);
-            }
-        }
-
-        /**
-         *Tracker for each detected barcode. This maintains a face graphic within the app's
-         * associated face overlay.
-         */
-        public class GraphicBarcodeTracker : Tracker
-        {
-            BarcodeScannerRenderer parent;
-
-            public GraphicBarcodeTracker(BarcodeScannerRenderer parent)
-            {
-                this.parent = parent;
-            }
-
-            /**
-* Start tracking the detected face instance within the face overlay.
-*/
-            public override void OnNewItem(int idValue, Java.Lang.Object item)
-            {
-                var id = idValue;
-            }
-
-            /**
-            * Update the position/characteristics of the face within the overlay.
-            */
-            public override void OnUpdate(Detector.Detections detections, Java.Lang.Object item)
-            {
-                //Video barcode DisplayValue
-                const string videoDisplayVal = "http://download.jimicloud.com/webDown/mibike?no=7551008104";
-                var barcode = item.JavaCast<Barcode>();
-                var stringValue = barcode.DisplayValue;
-
-                if (!parent._previouslyScanned)
-                {
-                    MessagingCenter.Send<GraphicBarcodeTracker, string>(this, "Barcode Scanned", stringValue);
-                    MessagingCenter.Send(this, "Close Scanner");
-                    parent._previouslyScanned = true;
-                }
-
-                //.Make(parent.MainLayout, "To start ride click Unlock. You are on PAYG", Snackbar.LengthLong)
-                //.SetAction("Unlock",
-                //    v => { })
-                //.Show();
-                //if (videoDisplayVal.Equals(stringValue) && !_previouslyScanned)
-                //{
-                //    //MessagingCenter.Send(this, "Close Scanner");
-
-                //    //AView layout = FindViewById(Android.Resource.Id.Content);
-                //    Snackbar
-                //        .Make(parent.MainLayout, "To start ride click Unlock. You are on PAYG", Snackbar.LengthLong)
-                //        .SetAction("Unlock",
-                //            v => { })
-                //        .Show();
-
-
-                //}
-            }
-        }
     }
 }

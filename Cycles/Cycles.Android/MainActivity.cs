@@ -1,10 +1,10 @@
-﻿using System;
-using Android;
+﻿using Android;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Common.Apis;
 using Android.Gms.Location;
-using Android.Hardware.Camera2;
+using Android.Locations;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -13,34 +13,45 @@ using Android.Support.V4.Content;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+
 using Cycles.Droid.Renderers;
-using Java.Util;
+using Cycles.Droid.Utils;
+
+using Java.Lang;
+
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+
 using Rg.Plugins.Popup;
 using Rg.Plugins.Popup.Services;
-using System.Linq;
+
+using System;
 using System.Threading.Tasks;
-using Android.Content;
-using Android.Content.Res;
-using Android.Support.V4.Content.Res;
-using Java.Lang;
+
 using Xamarin;
-using Xamarin.Essentials;
 using Xamarin.Forms;
-using Device = Xamarin.Forms.Device;
+using Xamarin.Forms.Platform.Android;
+
 using Exception = System.Exception;
 using Math = System.Math;
+using Platform = Xamarin.Essentials.Platform;
+using View = Android.Views.View;
 
 namespace Cycles.Droid
 {
     [Activity(Label = "Cycles", Theme = "@style/MainTheme",
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class MainActivity : FormsAppCompatActivity
     {
-        //, ShowWhenLocked = true
-        AlertDialog.Builder AlertDialog { get; set; }
+        private static readonly SparseIntArray Orientations = new SparseIntArray(4);
+        private static bool _isLocationAccessGranted;
+        private static bool _isLocationEnabled;
+
+        private App _app;
+        private bool IsScanOpen { get; set; }
+
+        #region Constant Fields
 
         private const long HIGH_ACC_INTERVAL_IN_MILLISECONDS = 30000;
         private const long FASTEST_HIGH_ACC_UPDATE_INTERVAL = HIGH_ACC_INTERVAL_IN_MILLISECONDS / 3;
@@ -48,59 +59,19 @@ namespace Cycles.Droid
         private const long BAL_ACC_INTERVAL_IN_MILLISECONDS = 10000;
         private const long FASTEST_BAL_ACC_UPDATE_INTERVAL = BAL_ACC_INTERVAL_IN_MILLISECONDS / 2;
 
-        private static readonly SparseIntArray ORIENTATIONS = new SparseIntArray(4);
-        private static readonly string TAG = "MLKIT";
-        private static readonly string MY_CAMERA_ID = "my_camera_id";
-        private static bool _isLocationAccessGranted;
-        private static bool _isLocationEnabled;
-
         private const int REQUEST_CAMERA_ID = 10;
         private const int REQUEST_LOCATION_ID = 0;
         private const int ESSENTIALS_LOCATION_REQUEST_ID = 1;
         private const int REQUEST_TURN_ON_LOCATION_ID = 2;
 
-        public static bool IsLocationAccessGranted
-        {
-            get => _isLocationAccessGranted;
-            private set
-            {
-                if (_isLocationAccessGranted == value) return;
-                LocationAccessChanged?.Invoke(value);
-                _isLocationAccessGranted = value;
-            }
-        }
+        private const string TAG = "MLKIT";
+        private const string MY_CAMERA_ID = "my_camera_id";
 
-        public static bool IsLocationEnabled
-        {
-            get => _isLocationEnabled;
-            private set
-            {
-                if (_isLocationEnabled)return;
-                LocationEnabledChanged?.Invoke(value);
-                _isLocationEnabled = value;
-            }
-        }
+        #endregion
 
-        public static event LocationAccessGrantedEventHandler LocationAccessChanged;
+        #region Overrides
 
-        public delegate void LocationAccessGrantedEventHandler(bool value);
-
-        public static event LocationEnabledEventHandler LocationEnabledChanged;
-
-        public delegate void LocationEnabledEventHandler(bool value);
-
-        private bool IsScanOpen { get; set; }
-
-
-        private string[] LocationPermissions { get; } =
-        {
-            Manifest.Permission.AccessCoarseLocation,
-            Manifest.Permission.AccessFineLocation
-        };
-
-        private App _app;
-
-        protected override async void OnCreate(Bundle savedInstanceState)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Popup.Init(this, savedInstanceState);
@@ -108,33 +79,49 @@ namespace Cycles.Droid
             Platform.Init(this, savedInstanceState);
             FormsMaps.Init(this, savedInstanceState);
 
-            if (_app == null)
-            {
-                _app = new App();
-            }
+            Receiver = new LocationSettingsBroadcastsReceiver();
+
+            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
 
             var dm = new DisplayMetrics();
             var windowManager = GetSystemService(WindowService).JavaCast<IWindowManager>();
 
             windowManager.DefaultDisplay.GetRealMetrics(dm);
-            App.ScreenHeight = (int) Math.Ceiling(dm.Ydpi);
-            App.ScreenWidth = (int) Math.Ceiling(dm.Xdpi);
+            App.ScreenHeight = (int)Math.Ceiling(dm.Ydpi);
+            App.ScreenWidth = (int)Math.Ceiling(dm.Xdpi);
             App.ScreenDensity = dm.Density;
-            CheckPermissions();
-            await CheckLocationEnabled();
+
+            if (_app == null) _app = new App();
 
             LoadApplication(_app);
         }
 
-        protected override void OnStart()
+        protected override async void OnStart()
         {
             base.OnStart();
+            await CheckLocationEnabled();
+            CheckPermissions();
+        }
 
-            AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
+        protected override void OnPause()
+        {
+            base.OnPause();
+            UnregisterReceiver(Receiver);
+            MessagingCenter.Unsubscribe<MapPageRenderer>(this, "Scanner Opened");
+            MessagingCenter.Unsubscribe<MapPageRenderer>(this, "Remove Lock-screen");
+        }
 
-            AlertDialog = new AlertDialog.Builder(this);
-            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", (mapPage) => { IsScanOpen = true; });
-            MessagingCenter.Subscribe<MapPageRenderer>(this, "Remove Lockscreen", (mapPage) =>
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            RegisterReceiver(Receiver, new IntentFilter(LocationManager.ModeChangedAction));
+
+            MessagingCenter.Subscribe<MapPageRenderer>(this, "Scanner Opened", mapPage =>
+            {
+                IsScanOpen = true;
+            });
+            MessagingCenter.Subscribe<MapPageRenderer>(this, "Remove Lock-screen", mapPage =>
             {
                 if (Build.VERSION.SdkInt >= BuildVersionCodes.OMr1)
                 {
@@ -149,135 +136,6 @@ namespace Cycles.Droid
                     Window.AddFlags(WindowManagerFlags.AllowLockWhileScreenOn);
                 }
             });
-            MessagingCenter
-                .Subscribe<BarcodeScannerRenderer.GraphicBarcodeTracker, string>(this, "Barcode Scanned", (main, s) =>
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        AlertDialog.SetTitle("Start Ride");
-                        AlertDialog.SetMessage("To start ride click Unlock. You are on PAYG");
-                        AlertDialog.SetPositiveButton("Unlock", (senderAlert, args) =>
-                        {
-                            Toast.MakeText(this, "Bike Unlocking", ToastLength.Short).Show();
-                            //NativeController.getReadDataUUID();
-                        });
-
-                        AlertDialog.SetNegativeButton("Cancel",
-                            (senderAlert, args) =>
-                            {
-                                Toast.MakeText(this, "Ride Cancelled!", ToastLength.Short).Show();
-                            });
-
-                        Dialog dialog = AlertDialog.Create();
-                        dialog.Show();
-                    });
-                });
-        }
-
-        private async Task CheckLocationEnabled()
-        {
-            try
-            {
-                LocationRequest
-                    highAccuracyRequest = LocationRequest.Create()
-                        .SetPriority(LocationRequest.PriorityHighAccuracy)
-                        .SetInterval(HIGH_ACC_INTERVAL_IN_MILLISECONDS)
-                        .SetFastestInterval(FASTEST_HIGH_ACC_UPDATE_INTERVAL);
-
-                LocationRequest
-                    balancedRequest = LocationRequest.Create()
-                        .SetPriority(LocationRequest.PriorityBalancedPowerAccuracy)
-                        .SetInterval(BAL_ACC_INTERVAL_IN_MILLISECONDS)
-                        .SetFastestInterval(FASTEST_BAL_ACC_UPDATE_INTERVAL);
-
-                LocationSettingsRequest.Builder locationSettingsRequestBuilder =
-                    new LocationSettingsRequest.Builder()
-                        .AddLocationRequest(highAccuracyRequest)
-                        .AddLocationRequest(balancedRequest)
-                        .SetAlwaysShow(true);
-
-                LocationSettingsResponse locationSettingsResult =
-                    await LocationServices.GetSettingsClient(this)
-                        .CheckLocationSettingsAsync(locationSettingsRequestBuilder.Build());
-
-                if (locationSettingsResult.LocationSettingsStates.IsLocationPresent &&
-                    locationSettingsResult.LocationSettingsStates.IsLocationUsable)
-                {
-                    IsLocationEnabled = true;
-                }
-            }
-            catch (ApiException exception)
-            {
-                if (exception.StatusCode != CommonStatusCodes.ResolutionRequired)
-                {
-                    if (exception.StatusCode == LocationSettingsStatusCodes.SettingsChangeUnavailable)
-                    {
-//                        GetLocationPermissions(Manifest.Permission.AccessFineLocation);
-                    }
-                }
-                else
-                {
-                    //  Location settings are not satisfied. But could be fixed by showing the
-                    //  user a dialog.
-                    try
-                    {
-                        var resolvable = exception as ResolvableApiException;
-                        resolvable?.StartResolutionForResult(this, REQUEST_TURN_ON_LOCATION_ID);
-                    }
-                    catch (IntentSender.SendIntentException)
-                    {
-                        //  Ignore the error.
-                    }
-                    catch (ClassCastException)
-                    {
-                        //  Ignore, should be an impossible error.
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Crashlytics.Crashlytics.LogException(Throwable.FromException(e));
-            }
-        }
-
-        private void CheckCamera()
-        {
-            CameraManager manager = (CameraManager) GetSystemService(CameraService);
-        }
-
-        private void CheckPermissions()
-        {
-            foreach (var permission in LocationPermissions)
-            {
-                IsLocationAccessGranted =
-                    ContextCompat.CheckSelfPermission(this, permission) == (int) Permission.Granted;
-                if (IsLocationAccessGranted) continue;
-                GetLocationPermissions(permission);
-                break;
-            }
-        }
-
-        private void GetLocationPermissions(string permission)
-        {
-            if (ActivityCompat.ShouldShowRequestPermissionRationale(this, permission))
-            {
-                Android.Views.View layout = FindViewById(Android.Resource.Id.Content);
-                Snackbar snackbar = Snackbar
-                    .Make(layout, "To automatically find your community, grant us location access",
-                        Snackbar.LengthIndefinite)
-                    .SetAction("Allow",
-                        v => ActivityCompat.RequestPermissions(this, LocationPermissions, REQUEST_LOCATION_ID))
-                    .SetActionTextColor(
-                        ContextCompat.GetColorStateList(this, Resource.Color.permission_snackbar_button));
-                snackbar.View.SetBackgroundResource(Resource.Drawable.rounded_bg_r4);
-                snackbar.View.BackgroundTintList = ContextCompat.GetColorStateList(this, Resource.Color.cyclesBlue);
-                ((FrameLayout.LayoutParams) snackbar.View.LayoutParameters).SetMargins(16, 16, 16, 16);
-                snackbar.Show();
-            }
-            else
-            {
-                RequestPermissions(LocationPermissions, REQUEST_LOCATION_ID);
-            }
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
@@ -331,7 +189,7 @@ namespace Cycles.Droid
         {
             if (Popup.SendBackPressed(base.OnBackPressed))
             {
-                await PopupNavigation.Instance.PopAsync(true);
+                await PopupNavigation.Instance.PopAsync();
             }
             else
             {
@@ -350,12 +208,154 @@ namespace Cycles.Droid
                     MessagingCenter.Send(this, "openMenu");
                     //Xamarin.Forms.Application.Current.MainPage = new Dashboard();
                     break;
-                default:
-                    break;
             }
 
             return base.OnOptionsItemSelected(item);
         }
+
+
+        #endregion
+
+        #region Functions
+
+        private async Task CheckLocationEnabled()
+        {
+            try
+            {
+                LocationRequest
+                    highAccuracyRequest = LocationRequest.Create()
+                        .SetPriority(LocationRequest.PriorityHighAccuracy)
+                        .SetInterval(HIGH_ACC_INTERVAL_IN_MILLISECONDS)
+                        .SetFastestInterval(FASTEST_HIGH_ACC_UPDATE_INTERVAL);
+
+                LocationRequest
+                    balancedRequest = LocationRequest.Create()
+                        .SetPriority(LocationRequest.PriorityBalancedPowerAccuracy)
+                        .SetInterval(BAL_ACC_INTERVAL_IN_MILLISECONDS)
+                        .SetFastestInterval(FASTEST_BAL_ACC_UPDATE_INTERVAL);
+
+                LocationSettingsRequest.Builder locationSettingsRequestBuilder =
+                    new LocationSettingsRequest.Builder()
+                        .AddLocationRequest(highAccuracyRequest)
+                        .AddLocationRequest(balancedRequest)
+                        .SetAlwaysShow(true);
+
+                LocationSettingsResponse locationSettingsResult =
+                    await LocationServices.GetSettingsClient(this)
+                        .CheckLocationSettingsAsync(locationSettingsRequestBuilder.Build());
+
+                if (locationSettingsResult.LocationSettingsStates.IsLocationPresent &&
+                    locationSettingsResult.LocationSettingsStates.IsLocationUsable)
+                    IsLocationEnabled = true;
+                else
+                    IsLocationEnabled = false;
+            }
+            catch (ApiException exception)
+            {
+                if (exception.StatusCode != CommonStatusCodes.ResolutionRequired)
+                {
+                    if (exception.StatusCode == LocationSettingsStatusCodes.SettingsChangeUnavailable)
+                    {
+                        //  GetLocationPermissions(Manifest.Permission.AccessFineLocation);
+                    }
+                }
+                else
+                {
+                    //  Location settings are not satisfied. But could be fixed by showing the
+                    //  user a dialog.
+                    try
+                    {
+                        var resolvable = exception as ResolvableApiException;
+                        resolvable?.StartResolutionForResult(this, REQUEST_TURN_ON_LOCATION_ID);
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+//                Crashlytics.Crashlytics.LogException(Throwable.FromException(e));
+            }
+        }
+
+        private void CheckPermissions()
+        {
+            foreach (var permission in LocationPermissions)
+            {
+                IsLocationAccessGranted =
+                    ContextCompat.CheckSelfPermission(this, permission) == (int)Permission.Granted;
+                if (IsLocationAccessGranted) continue;
+                GetLocationPermissions(permission);
+                break;
+            }
+        }
+
+        private void GetLocationPermissions(string permission)
+        {
+            if (ActivityCompat.ShouldShowRequestPermissionRationale(this, permission))
+            {
+                View layout = FindViewById(Android.Resource.Id.Content);
+                Snackbar snackbar = Snackbar
+                    .Make(layout, "To automatically find your community, grant us location access",
+                        Snackbar.LengthIndefinite)
+                    .SetAction("Allow",
+                        v => ActivityCompat.RequestPermissions(this, LocationPermissions, REQUEST_LOCATION_ID))
+                    .SetActionTextColor(
+                        ContextCompat.GetColorStateList(this, Resource.Color.permission_snackbar_button));
+                snackbar.View.SetBackgroundResource(Resource.Drawable.rounded_bg_r4);
+                snackbar.View.BackgroundTintList = ContextCompat.GetColorStateList(this, Resource.Color.cyclesBlue);
+                ((FrameLayout.LayoutParams)snackbar.View.LayoutParameters).SetMargins(16, 16, 16, 16);
+                snackbar.Show();
+            }
+            else
+            {
+                RequestPermissions(LocationPermissions, REQUEST_LOCATION_ID);
+            }
+        }
+
+        #endregion
+
+        #region Location related props, fields, events and delegates
+
+        public static bool IsLocationAccessGranted
+        {
+            get => _isLocationAccessGranted;
+            private set
+            {
+                if (_isLocationAccessGranted == value) return;
+                LocationAccessChanged?.Invoke(value);
+                _isLocationAccessGranted = value;
+            }
+        }
+
+        public static bool IsLocationEnabled {
+            get => _isLocationEnabled;
+            internal set {
+                if (_isLocationEnabled == value) return;
+                LocationSettingsChanged?.Invoke(value);
+                _isLocationEnabled = value;
+            }
+        }
+
+        private string[] LocationPermissions { get; } =
+        {
+            Manifest.Permission.AccessCoarseLocation,
+            Manifest.Permission.AccessFineLocation
+        };
+
+        private LocationSettingsBroadcastsReceiver Receiver { get; set; }
+
+        public delegate void LocationAccessEventHandler(bool value);
+
+        public delegate void LocationSettingsEventHandler(bool value);
+
+        public static event LocationAccessEventHandler LocationAccessChanged;
+
+        public static event LocationSettingsEventHandler LocationSettingsChanged;
+
+        #endregion
 
         //[RequiresApi(Api = (int)BuildVersionCodes.Lollipop)]
         //private void ImageFromMediaImage(Image mediaImage, int rotation)

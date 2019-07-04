@@ -12,5 +12,13 @@
         public const string ACTION_STOP_SERVICE = "RideHandlerService.action.STOP_SERVICE";
         public const string ACTION_RESTART_TIMER = "RideHandlerService.action.RESTART_TIMER";
         public const string ACTION_MAIN_ACTIVITY = "RideHandlerService.action.MAIN_ACTIVITY";
+
+        public const int SUCCESS_RESULT = 0;
+        public const int FAILURE_RESULT = 1;
+        public const string PACKAGE_NAME = "com.cycles.bikeshare";
+        public const string RECEIVER = PACKAGE_NAME + ".RECEIVER";
+        public const string RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY";
+        public const string RESULT_DATA_KEY2 = PACKAGE_NAME + ".RESULT_DATA_KEY2";
+        public const string LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
     }
 }

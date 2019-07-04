@@ -1,5 +1,4 @@
-﻿using Android;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Auth.Api;
@@ -12,12 +11,10 @@ using Android.Preferences;
 using Android.Support.Constraints;
 using Android.Support.Design.Widget;
 using Android.Support.V4.App;
-using Android.Support.V4.Content;
 using Android.Support.V4.View;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using Crashlytics;
 using Cycles.Droid.CustomViews;
 using Cycles.Droid.Utils;
 using Firebase;
@@ -27,15 +24,10 @@ using Java.Util.Concurrent;
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xamarin.Essentials;
 using Xamarin.Facebook;
 using Xamarin.Facebook.Login;
-using Xamarin.Facebook.Login.Widget;
-
 using static Cycles.Droid.Utils.SplashAnimationHelper;
 using static Android.Gms.Common.Apis.GoogleApiClient;
-using Firebase.DynamicLinks;
 using Android.Gms.Tasks;
 using Firebase.Analytics;
 using Microsoft.AppCenter;
@@ -48,14 +40,14 @@ namespace Cycles.Droid
     [Activity(Label = "Cycles", Icon = "@mipmap/icon", Theme = "@style/Splash",
         MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
 
-    public partial class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback, IOnSuccessListener
+    public class Splash : FragmentActivity, IOnConnectionFailedListener, IFacebookCallback, IOnSuccessListener
     {
         #region CONSTANTS
 
         private const string TAG = "SplashActivity";
         private const int RC_SIGN_IN = 9001;
         private const int VERIFICATION_TIMEOUT = 30;
-        private const string first_run = "first_run";
+        private const string FIRST_RUN = "first_run";
         private const int REQUEST_LOCATION_ID = 0;
 
         #endregion
@@ -93,19 +85,14 @@ namespace Cycles.Droid
 
             Crashlytics.Crashlytics.HandleManagedExceptions();
 
-            FirebaseOptions options = new FirebaseOptions.Builder()
-                 .SetApiKey("AIzaSyBnw6unIyRQ4XfFZNekTpU7rWumSvv5cnw")
-                 .SetApplicationId("1:316655980255:android:05c55f9b9a1c0243")
-                 .Build();
-
             AppCenter.Start("4b376e42-98b2-47fd-af73-7a84453954f9", typeof(Analytics), typeof(Crashes));
 
-            App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext, options);
+            App = FirebaseApp.Instance ?? FirebaseApp.InitializeApp(ApplicationContext);
             FirebaseAuth = FirebaseAuth.GetInstance(App);
             FirebaseAnalytics.GetInstance(this);
             //FirebaseDynamicLinks.Instance.GetDynamicLink(Intent).AddOnSuccessListener(this);
 
-            bool firstRun = sharedPreferences.Contains(first_run);
+            bool firstRun = sharedPreferences.Contains(FIRST_RUN);
 
             if (Intent.HasExtra("intent_activity") && Intent.GetStringExtra("intent_activity").Equals("LoginActivity"))
             {
@@ -120,7 +107,7 @@ namespace Cycles.Droid
             }
             else if (!firstRun)
             {
-                sharedPreferences.Edit().PutBoolean(first_run, false).Apply();
+                sharedPreferences.Edit().PutBoolean(FIRST_RUN, false).Apply();
                 SplashInit();
             }
             else if (firstRun)
@@ -149,7 +136,7 @@ namespace Cycles.Droid
             SplashBaseLayout = FindViewById<RelativeLayout>(Resource.Id.base_layout);
 
             IndicatorLayout indicators = FindViewById<IndicatorLayout>(Resource.Id.indicatorLayout);
-            indicators.Number_of_Indicators = 3;
+            indicators.NumberOfIndicators = 3;
 
             FastFitPath = FindViewById<ImageView>(Resource.Id.fast_fit_path_imageview);
             FastFitInitialDrawable = FastFitPath.Drawable;

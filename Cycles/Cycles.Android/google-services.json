@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "316655980255-eipdgqdsl4l5q2jq79smeksa61hbv73i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Kinesys.Cycles",
+            "certificate_hash": "e3c3b81a695dfa541f001efcaad36ebb087d9d41"
+          }
+        },
+        {
           "client_id": "316655980255-dv1e21hv5ipbpv6ocjckt1jkmkhe34vt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -33,20 +41,50 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "316655980255-fudv9pg2bcs7s89eevadgo82nrj0t83v.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:316655980255:android:cc69490ac9737497",
+        "android_client_info": {
+          "package_name": "com.cycles.bikeshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "316655980255-g0g5q8cod8rg9c5f06vqrs88ikr6mafr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cycles.bikeshare",
+            "certificate_hash": "391c2a858b26909229d23e68e0f2d17f48395769"
+          }
         },
-        "ads_service": {
-          "status": 2
+        {
+          "client_id": "316655980255-fudv9pg2bcs7s89eevadgo82nrj0t83v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnw6unIyRQ4XfFZNekTpU7rWumSvv5cnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "316655980255-fudv9pg2bcs7s89eevadgo82nrj0t83v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

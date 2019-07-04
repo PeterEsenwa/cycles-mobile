@@ -1,21 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using Java.Util;
-using static Java.Util.UUID;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
+﻿using System.Runtime.InteropServices;
 using Java.Lang;
 
-namespace Cycles.Droid
+namespace Cycles.Droid.Utils
 {
     public class NativeController
     {

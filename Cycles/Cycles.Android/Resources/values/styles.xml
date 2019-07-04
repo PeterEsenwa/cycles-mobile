@@ -6,7 +6,7 @@
     <item name="colorPrimary">@color/colorPrimary</item>
   </style>
   <!-- Base theme applied no matter what API -->
-  <style name="MainTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+  <style name="MainTheme.Base" parent="Theme.MaterialComponents.Light.NoActionBar">
     <item name="android:windowNoTitle">true</item>
     <!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
     <item name="windowNoTitle">true</item>
@@ -25,15 +25,24 @@
     <item name="windowActionModeOverlay">true</item>
     <item name="android:colorActivatedHighlight">#E46F74</item>
 
+    <!-- <item name="android:textAppearance">@style/temp</item> -->
+
     <item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
   </style>
-  
+
+  <style name="temp" parent="TextAppearance.MaterialComponents.Button">
+    <item name="fontFamily">@font/roboto_medium</item>
+    <item name="android:textSize">18sp</item>
+    <item name="android:textAlignment">center</item>
+    <item name="android:textColor">@color/colorWhite</item>
+  </style>
+
   <style name="Onboards" parent="Splash">
     <item name="android:windowBackground">@color/launcher_background</item>
 
   </style>
 
-  <style name="Splash" parent="Theme.AppCompat.Light.NoActionBar">
+  <style name="Splash" parent="Theme.MaterialComponents.Light.NoActionBar">
     <item name="android:windowBackground">@drawable/splash_screen</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>

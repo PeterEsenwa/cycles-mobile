@@ -7,21 +7,18 @@ using Xamarin.Forms.Xaml;
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace Cycles
 {
-    public partial class App : Application
+    public partial class App
     {
         public static int ScreenHeight { get; set; }
 
         public static int ScreenWidth { get; set; }
-
-        private static RootPage rootPage;
 
         public static float ScreenDensity { get; internal set; }
 
         public App()
         {
             InitializeComponent();
-            rootPage = new RootPage();
-            MainPage = rootPage;
+            MainPage = new RootPage();
         }
 
         protected override void OnStart()

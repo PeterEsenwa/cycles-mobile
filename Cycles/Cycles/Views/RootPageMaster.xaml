@@ -46,7 +46,8 @@
                             <Image Source="{Binding ImageUrl}"
                                    VerticalOptions="Center"
                                    HorizontalOptions="Center"
-                                   Scale=".5"
+                                   Scale="1"
+                                   Aspect="AspectFit"
                                    Grid.Column="0" />
                             <views:CustomLabel Margin="{Utils:ResponsiveThickness Size=Large,
                                                                                   Bottom=8,

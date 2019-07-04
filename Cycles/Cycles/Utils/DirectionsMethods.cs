@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -100,8 +101,8 @@ namespace Cycles.Utils
             {
                 apiUrl = string.Format(URLS.GoogleDirectionAPI,
                     startLatitude, startLongitude,
-                    endLatitude.ToString(),
-                    endLongitude.ToString()
+                    endLatitude.ToString(CultureInfo.InvariantCulture),
+                    endLongitude.ToString(CultureInfo.InvariantCulture)
                     );
                 //WebRequest request = HttpWebRequest.Create(apiUrl);
                 HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
@@ -128,7 +129,7 @@ namespace Cycles.Utils
                 //var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
                 //var d = R * c;
                 //return d * 1000;
-                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
+//                Crashlytics.Crashlytics.LogException(Java.Lang.Throwable.FromException(ex));
                 return null;
             }
 

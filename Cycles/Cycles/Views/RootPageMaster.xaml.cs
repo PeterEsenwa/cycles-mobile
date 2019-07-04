@@ -37,8 +37,8 @@ namespace Cycles.Views
             {
                 MenuItems = new ObservableCollection<RootPageMenuItem>(new[]
                 {
-                    new RootPageMenuItem { Id = 0, Title = "Home", TargetType = typeof(MapPage), ImageUrl="house_icon" },
-                    new RootPageMenuItem { Id = 1, Title = "Dashboard", TargetType = typeof(Dashboard), ImageUrl="bar_chart"  },
+                    new RootPageMenuItem { Id = 0, Title = "Map", TargetType = typeof(MapPage), ImageUrl="map_icon" },
+                    new RootPageMenuItem { Id = 1, Title = "Dashboard", TargetType = typeof(Dashboard), ImageUrl="dashboard_icon"  },
                     //new RootPageMenuItem { Id = 2, Title = "Profile" , TargetType = typeof(RootPageDetail) },
                     //new RootPageMenuItem { Id = 3, Title = "Plans & Membership" , TargetType = typeof(RootPageDetail) },
                     new RootPageMenuItem { Id = 4, Title = "How to Use", TargetType = typeof(HowTo), ImageUrl="how_to_use"  },

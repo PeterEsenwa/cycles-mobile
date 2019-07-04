@@ -24,7 +24,35 @@
   <string name="com.crashlytics.android.build_id">cycles.v1.alpha</string>
   <string name="connection_failed">Connection failed, please check your internet connection</string>
   <string name="cycles_black_logo">cycles_black_logo</string>
+
+  <string name="oauth_client_id">316655980255-g0g5q8cod8rg9c5f06vqrs88ikr6mafr.apps.googleusercontent.com</string>
+
   <string name="go">GO</string>
   <string name="action_menu_overflow_description">More options</string>
   <string name="description_start_voice_search">Start voice search</string>
+
+  <string name="info_welcome">Welcome back! We are setting things up</string>
+  <string name="info_you_are_in">You are in a cycles community</string>
+  <string name="info_getting_your_location">Getting your location...</string>
+  <string name="info_not_in_a_community">You aren\'t in a cycles community</string>
+  <string name="info_could_not_find_you">We couldn\'t find you</string>
+  <string name="info_no_community_selected">None Selected</string>
+
+  <string name="no_geocoder_available">No geocoder available</string>
+
+  <string name="fetch_address">Fetch address</string>
+
+  <string name="address_found">Address found</string>
+
+  <string name="no_address_found">Sorry, no address found</string>
+  <string name="no_location_data_provided">No location data provided</string>
+  <string name="service_not_available">Sorry, the service is not available</string>
+  <string name="invalid_lat_long_used">Invalid latitude or longitude used</string>
+
+
+  <string name="permission_rationale">Location permission is needed for core functionality</string>
+  <string name="permission_denied_explanation">
+    Permission was denied, but is needed for core
+    functionality.
+  </string>
 </resources>
